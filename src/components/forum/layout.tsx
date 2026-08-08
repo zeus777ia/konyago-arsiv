@@ -7,6 +7,7 @@ import {
   Scale,
   Search,
   Shield,
+  ShieldCheck,
   ShoppingBag,
   X,
 } from "lucide-react";
@@ -20,6 +21,7 @@ import { UserButton } from "@/lib/auth/gates";
 import { SeedOfficialForum } from "@/components/forum/seed-official";
 import { isFounder } from "@/lib/staff/founder";
 import { useForumStore } from "@/lib/forum/store";
+import { useReportsStore } from "@/lib/reports/store";
 
 export function ForumShell({
   children,
@@ -35,6 +37,9 @@ export function ForumShell({
   const founder = isFounder(user);
   const pendingN = useForumStore(
     (s) => s.threads.filter((t) => t.status === "pending").length,
+  );
+  const openReports = useReportsStore(
+    (s) => s.reports.filter((r) => r.status === "open").length,
   );
 
   return (
@@ -93,10 +98,19 @@ export function ForumShell({
             <NavLink to="/kurallar" icon={<Scale className="size-3.5" />}>
               Kurallar
             </NavLink>
+            <NavLink
+              to="/guvenlik"
+              icon={<ShieldCheck className="size-3.5" />}
+              className="hidden sm:inline-flex"
+            >
+              Güvenlik
+            </NavLink>
             {founder && (
               <NavLink to="/moderasyon" icon={<Shield className="size-3.5" />}>
                 Moderasyon
-                {pendingN > 0 ? ` (${pendingN})` : ""}
+                {pendingN + openReports > 0
+                  ? ` (${pendingN + openReports})`
+                  : ""}
               </NavLink>
             )}
             <NavLink
@@ -149,6 +163,13 @@ export function ForumShell({
           </Link>
           {" · "}
           <Link
+            to="/guvenlik"
+            className="font-medium text-primary underline-offset-2 hover:underline"
+          >
+            Güvenlik
+          </Link>
+          {" · "}
+          <Link
             to="/kurallar"
             className="font-medium text-primary underline-offset-2 hover:underline"
           >
@@ -161,8 +182,9 @@ export function ForumShell({
 
       <footer className="mt-4 border-t border-border bg-surface">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-3 py-5 text-xs text-muted sm:px-4">
-          <p className="max-w-3xl leading-relaxed text-[11px] text-subtle">
-            {DISCLAIMER_SHORT}
+          <p className="max-w-3xl text-[11px] leading-relaxed text-subtle">
+            {DISCLAIMER_SHORT} Otomatik filtre ve moderasyon riski azaltır; mutlak
+            güvenlik vaat edilmez.
           </p>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p>
@@ -175,6 +197,12 @@ export function ForumShell({
               </a>
             </p>
             <div className="flex flex-wrap gap-3">
+              <Link to="/guvenlik" className="hover:text-primary">
+                Güvenlik
+              </Link>
+              <Link to="/sss" className="hover:text-primary">
+                SSS
+              </Link>
               <Link to="/kurallar" className="hover:text-primary">
                 Kurallar
               </Link>
@@ -187,11 +215,8 @@ export function ForumShell({
               <Link to="/kvkk" className="hover:text-primary">
                 KVKK
               </Link>
-              <Link to="/ikinci-el" className="hover:text-primary">
-                İkinci el
-              </Link>
-              <Link to="/is-ilani" className="hover:text-primary">
-                İş panosu
+              <Link to="/hesabim" className="hover:text-primary">
+                Hesabım
               </Link>
               <a
                 href="https://konyago.com.tr"

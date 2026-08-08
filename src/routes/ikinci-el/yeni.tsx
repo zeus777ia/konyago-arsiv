@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, ShieldAlert } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { ForumShell } from "@/components/forum/layout";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ function NewListingPage() {
   const navigate = useNavigate();
   const addListing = useMarketplaceStore((s) => s.addListing);
   const user = useCurrentUser();
+  const formStartedAt = useMemo(() => Date.now(), []);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<ListingCategory>("diger");
@@ -37,6 +38,11 @@ function NewListingPage() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      toast.error("İlan vermek için giriş yapın");
+      void navigate({ to: "/login" });
+      return;
+    }
     if (title.trim().length < 5) {
       toast.error("Başlık en az 5 karakter");
       return;
@@ -53,7 +59,13 @@ function NewListingPage() {
       toast.error("Kuralları onaylamanız gerekiyor");
       return;
     }
-    const spam = runAllSpamChecks({ kind: "listing", title, body: description, honeypot });
+    const spam = runAllSpamChecks({
+      kind: "listing",
+      title,
+      body: description,
+      honeypot,
+      formStartedAt,
+    });
     if (!spam.ok) {
       toast.error(spam.reason);
       return;
@@ -71,7 +83,7 @@ function NewListingPage() {
       district,
       priceNote: priceNote || "Fiyat görüşülür",
       contact,
-      authorName: user?.displayName ?? "Misafir",
+      authorName: user.displayName ?? "Üye",
     });
     recordSpamEvent("listing", title + "\n" + description);
     toast.success("İlan yayınlandı");
@@ -103,8 +115,16 @@ function NewListingPage() {
           onSubmit={submit}
           className="relative space-y-4 rounded-lg border border-border bg-surface p-4 shadow-card sm:p-5"
         >
-          <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden>
-            <input tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+          <div
+            className="absolute -left-[9999px] h-0 w-0 overflow-hidden"
+            aria-hidden
+          >
+            <input
+              tabIndex={-1}
+              autoComplete="off"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+            />
           </div>
           <h1 className="text-lg font-semibold">İkinci el ilanı</h1>
           <Field label="Başlık">
@@ -187,6 +207,7 @@ function NewListingPage() {
             />
             <span>
               Sitede ödeme olmadığını, kuralları ve yasal uyarıyı kabul ediyorum.
+              Dolandırıcılığa karşı dikkatli olacağım.
             </span>
           </label>
           <Button type="submit" className="w-full">

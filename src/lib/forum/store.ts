@@ -24,6 +24,7 @@ type ForumState = {
     authorName: string;
     asFounder?: boolean;
     honeypot?: string;
+    formStartedAt?: number;
   }) => AddThreadResult;
   addReply: (input: {
     threadId: string;
@@ -31,6 +32,7 @@ type ForumState = {
     authorName: string;
     asFounder?: boolean;
     honeypot?: string;
+    formStartedAt?: number;
   }) => AddReplyResult;
   bumpViews: (threadId: string) => void;
   deleteThread: (threadId: string) => void;
@@ -74,6 +76,7 @@ export const useForumStore = create<ForumState>()(
         authorName,
         asFounder,
         honeypot,
+        formStartedAt,
       }) => {
         const catOk = canPostInCategory(categoryId, !!asFounder);
         if (!catOk.ok) return { ok: false, error: catOk.reason };
@@ -84,6 +87,7 @@ export const useForumStore = create<ForumState>()(
             title,
             body,
             honeypot,
+            formStartedAt,
           });
           if (!spam.ok) return { ok: false, error: spam.reason };
         }
@@ -128,7 +132,14 @@ export const useForumStore = create<ForumState>()(
         }
         return { ok: true, threadId, status };
       },
-      addReply: ({ threadId, body, authorName, asFounder, honeypot }) => {
+      addReply: ({
+        threadId,
+        body,
+        authorName,
+        asFounder,
+        honeypot,
+        formStartedAt,
+      }) => {
         const thread = get().threads.find((t) => t.id === threadId);
         if (!thread) return { ok: false, error: "Konu bulunamadı" };
         if (thread.locked && !asFounder) {
@@ -149,6 +160,7 @@ export const useForumStore = create<ForumState>()(
             kind: "reply",
             body,
             honeypot,
+            formStartedAt,
           });
           if (!spam.ok) return { ok: false, error: spam.reason };
         }

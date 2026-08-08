@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Navigate } from "@tanstack/react-router";
+import { Link, Navigate } from "@tanstack/react-router";
 import { Crown } from "lucide-react";
 import { authEnabled, signOut } from "./client";
 import { useCurrentUser, useCurrentUserState } from "./use-current-user";
@@ -40,32 +40,38 @@ export function UserButton() {
 
   return (
     <div className="flex items-center gap-2">
-      {user.profileImageUrl ? (
-        <img
-          src={user.profileImageUrl}
-          alt=""
-          className="h-8 w-8 rounded-full object-cover"
-        />
-      ) : (
-        <span
-          className={
-            founder
-              ? "founder-avatar grid h-8 w-8 place-items-center rounded-full text-xs font-semibold"
-              : "grid h-8 w-8 place-items-center rounded-full bg-white/15 text-xs font-semibold text-header-fg"
-          }
-        >
-          {founder ? "★" : label.charAt(0).toUpperCase()}
-        </span>
-      )}
-      <div className="hidden min-w-0 flex-col sm:flex">
-        <UserName name={label} size="sm" className="max-w-[9rem] truncate" />
-        {founder && (
-          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold tracking-wider text-emerald-300 uppercase">
-            <Crown className="size-2.5" />
-            {FOUNDER_TITLE}
+      <Link
+        to="/hesabim"
+        className="flex min-w-0 items-center gap-2 rounded-md px-1 py-0.5 hover:bg-white/10"
+        title="Hesabım"
+      >
+        {user.profileImageUrl ? (
+          <img
+            src={user.profileImageUrl}
+            alt=""
+            className="h-8 w-8 rounded-full object-cover"
+          />
+        ) : (
+          <span
+            className={
+              founder
+                ? "founder-avatar grid h-8 w-8 place-items-center rounded-full text-xs font-semibold"
+                : "grid h-8 w-8 place-items-center rounded-full bg-white/15 text-xs font-semibold text-header-fg"
+            }
+          >
+            {founder ? "★" : label.charAt(0).toUpperCase()}
           </span>
         )}
-      </div>
+        <div className="hidden min-w-0 flex-col sm:flex">
+          <UserName name={label} size="sm" className="max-w-[9rem] truncate" />
+          {founder && (
+            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold tracking-wider text-emerald-300 uppercase">
+              <Crown className="size-2.5" />
+              {FOUNDER_TITLE}
+            </span>
+          )}
+        </div>
+      </Link>
       <button
         type="button"
         onClick={onSignOut}

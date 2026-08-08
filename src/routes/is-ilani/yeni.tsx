@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, ShieldAlert } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { ForumShell } from "@/components/forum/layout";
 import { Button } from "@/components/ui/button";
@@ -35,9 +35,15 @@ function NewJobPage() {
   const [salaryNote, setSalaryNote] = useState("");
   const [accepted, setAccepted] = useState(false);
   const [honeypot, setHoneypot] = useState("");
+  const formStartedAt = useMemo(() => Date.now(), []);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      toast.error("İlan vermek için giriş yapın");
+      void navigate({ to: "/login" });
+      return;
+    }
     if (title.trim().length < 5) {
       toast.error("Başlık en az 5 karakter");
       return;
@@ -54,7 +60,7 @@ function NewJobPage() {
       toast.error("Kuralları onaylayın");
       return;
     }
-    const spam = runAllSpamChecks({ kind: "job", title, body: description, honeypot });
+    const spam = runAllSpamChecks({ kind: "job", title, body: description, honeypot, formStartedAt });
     if (!spam.ok) {
       toast.error(spam.reason);
       return;

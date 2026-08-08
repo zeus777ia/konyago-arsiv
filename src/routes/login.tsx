@@ -220,7 +220,7 @@ function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={inputCls}
-                placeholder="En az 6 karakter"
+                placeholder="En az 8 karakter, harf + rakam"
               />
             </Field>
             <label className="flex items-start gap-2 text-xs text-muted">
@@ -320,7 +320,7 @@ function Login() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className={inputCls}
-                placeholder="En az 6 karakter"
+                placeholder="En az 8 karakter, harf + rakam"
               />
             </Field>
             <Button type="submit" className="w-full" disabled={busy}>

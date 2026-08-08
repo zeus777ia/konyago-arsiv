@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, ShieldAlert } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { z } from "zod";
 import { ForumShell } from "@/components/forum/layout";
@@ -26,6 +26,7 @@ function NewTopicPage() {
   const addThread = useForumStore((s) => s.addThread);
   const user = useCurrentUser();
   const founder = isFounder(user);
+  const formStartedAt = useMemo(() => Date.now(), []);
 
   const openCategories = CATEGORIES.filter(
     (c) => founder || !isCategoryLockedForUsers(c.id),
@@ -45,21 +46,27 @@ function NewTopicPage() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      toast.error("Konu açmak için giriş yapmalısınız");
+      void navigate({ to: "/login" });
+      return;
+    }
     if (title.trim().length < 5) {
       toast.error("Başlık en az 5 karakter olmalı");
       return;
     }
-    if (body.trim().length < 10) {
-      toast.error("Mesaj en az 10 karakter olmalı");
+    if (body.trim().length < 15) {
+      toast.error("Mesaj en az 15 karakter olmalı");
       return;
     }
     const res = addThread({
       categoryId,
       title,
       body,
-      authorName: user?.displayName ?? "Misafir",
+      authorName: user.displayName ?? "Üye",
       asFounder: founder,
       honeypot,
+      formStartedAt,
     });
     if (!res.ok) {
       toast.error(res.error);
@@ -68,7 +75,7 @@ function NewTopicPage() {
     if (res.status === "pending") {
       toast.message("Konu moderasyon kuyruğuna alındı", {
         description:
-          "1) Otomatik filtre geçildi · 2) İncelemede · 3) Kurucu onayı sonrası yayında. Spam koruması aktiftir.",
+          "Otomatik filtre geçildi. Kurucu onayından sonra yayında görünecek.",
       });
     } else {
       toast.success("Konu yayınlandı");
@@ -93,36 +100,35 @@ function NewTopicPage() {
       <div className="mx-auto max-w-2xl">
         <h1 className="mb-1 text-xl font-semibold tracking-tight">Yeni konu aç</h1>
         <p className="mb-4 text-sm text-muted">
-          Konular önce moderasyon incelemesine alınır. Spam koruması (hız sınırı,
-          tekrar, link) ve içerik filtresi aktiftir.
+          Üyelik zorunludur. 8 katmanlı spam koruması ve moderasyon onayı aktiftir.
         </p>
+
+        {!user && (
+          <div className="mb-5 rounded-lg border border-border bg-surface px-4 py-4 text-sm shadow-card">
+            <p className="text-muted">Konu açmak için hesabınıza giriş yapın.</p>
+            <Button className="mt-3" asChild>
+              <Link to="/login">Giriş / Kayıt</Link>
+            </Button>
+          </div>
+        )}
 
         <div className="mb-5 space-y-2 rounded-lg border border-primary/20 bg-primary-soft px-3 py-2.5 text-xs leading-relaxed text-fg">
           <p className="flex gap-2">
             <ShieldAlert className="mt-0.5 size-4 shrink-0 text-primary" />
             <span>
-              <strong>Onay süreci:</strong> Gönder → Otomatik filtre → İncelemede
-              (listelerde gizli) → Kurucu onayı → Yayında. Reddedilen konular
-              kilitlenir.
+              <strong>Onay süreci:</strong> Gönder → Otomatik filtre (spam +
+              yasak içerik) → İncelemede → Kurucu onayı → Yayında.{" "}
+              <Link to="/guvenlik" className="font-medium text-primary hover:underline">
+                Güvenlik merkezi
+              </Link>
             </span>
-          </p>
-          <p className="pl-6">
-            <Link
-              to="/kurallar"
-              className="font-medium text-primary underline-offset-2 hover:underline"
-            >
-              Platform Kullanım Kuralları
-            </Link>
-            {" · "}
-            Duyurular bölümüne üye konu açamaz.
           </p>
         </div>
 
         <form
           onSubmit={submit}
-          className="space-y-4 rounded-lg border border-border bg-surface p-4 shadow-card sm:p-5"
+          className="relative space-y-4 rounded-lg border border-border bg-surface p-4 shadow-card sm:p-5"
         >
-          {/* Honeypot — botlar doldurursa istek reddedilir */}
           <div
             className="absolute -left-[9999px] h-0 w-0 overflow-hidden"
             aria-hidden
@@ -145,7 +151,8 @@ function NewTopicPage() {
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="h-10 w-full rounded-md border border-border bg-bg-elevated px-3 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
+              disabled={!user}
+              className="h-10 w-full rounded-md border border-border bg-bg-elevated px-3 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15 disabled:opacity-60"
             >
               {openCategories.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -164,8 +171,9 @@ function NewTopicPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               maxLength={120}
+              disabled={!user}
               placeholder="Konu başlığı"
-              className="h-10 w-full rounded-md border border-border bg-bg-elevated px-3 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
+              className="h-10 w-full rounded-md border border-border bg-bg-elevated px-3 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15 disabled:opacity-60"
             />
           </div>
 
@@ -177,8 +185,9 @@ function NewTopicPage() {
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={8}
+              disabled={!user}
               placeholder="İçeriğinizi yazın…"
-              className="w-full resize-y rounded-md border border-border bg-bg-elevated px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
+              className="w-full resize-y rounded-md border border-border bg-bg-elevated px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15 disabled:opacity-60"
             />
           </div>
 
@@ -186,7 +195,7 @@ function NewTopicPage() {
             <Button type="button" variant="secondary" asChild>
               <Link to="/">İptal</Link>
             </Button>
-            <Button type="submit">
+            <Button type="submit" disabled={!user}>
               {founder ? "Konuyu yayınla" : "İncelemeye gönder"}
             </Button>
           </div>

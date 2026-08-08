@@ -27,6 +27,7 @@ import { useForumStore } from "@/lib/forum/store";
 import { formatRelative } from "@/lib/utils";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { isFounder } from "@/lib/staff/founder";
+import { ReportButton } from "@/components/forum/report-button";
 
 export const Route = createFileRoute("/konu/$threadId")({
   component: ThreadPage,
@@ -51,6 +52,7 @@ function ThreadPage() {
   const founder = isFounder(user);
   const [body, setBody] = useState("");
   const [honeypot, setHoneypot] = useState("");
+  const formStartedAt = useMemo(() => Date.now(), []);
 
   const thread = threads.find((t) => t.id === threadId);
   const category = thread ? getCategory(thread.categoryId) : undefined;
@@ -85,12 +87,21 @@ function ThreadPage() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      toast.error("Cevap yazmak için giriş yapmalısınız");
+      return;
+    }
+    if (body.trim().length < 2) {
+      toast.error("Mesaj çok kısa");
+      return;
+    }
     const res = addReply({
       threadId,
       body: body.trim(),
       authorName: user?.displayName ?? "Misafir",
       asFounder: founder,
       honeypot,
+      formStartedAt,
     });
     if (!res.ok) {
       toast.error(res.error);
@@ -162,13 +173,16 @@ function ThreadPage() {
         <h1 className="text-lg font-semibold tracking-tight text-fg sm:text-xl">
           {thread.title}
         </h1>
-        <p className="mt-1 flex flex-wrap items-center gap-1 text-xs text-subtle">
-          <UserName name={displayName(thread.authorId, names)} size="sm" />
-          <span>· {formatRelative(thread.createdAt)}</span>
-          <span>
-            · {thread.replies} cevap · {thread.views} görüntülenme
-          </span>
-        </p>
+        <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+          <p className="flex flex-wrap items-center gap-1 text-xs text-subtle">
+            <UserName name={displayName(thread.authorId, names)} size="sm" />
+            <span>· {formatRelative(thread.createdAt)}</span>
+            <span>
+              · {thread.replies} cevap · {thread.views} görüntülenme
+            </span>
+          </p>
+          <ReportButton targetType="thread" targetId={threadId} />
+        </div>
 
         {founder && (
           <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
@@ -297,20 +311,23 @@ function ThreadPage() {
                     <span>
                       #{idx + 1} · {formatRelative(post.createdAt)}
                     </span>
-                    {founder && !post.id.startsWith("official_") && (
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-danger hover:bg-danger/10"
-                        onClick={() => {
-                          if (!confirm("Bu mesaj silinsin mi?")) return;
-                          deletePost(post.id);
-                          toast.success("Mesaj silindi");
-                        }}
-                      >
-                        <Trash2 className="size-3" />
-                        Sil
-                      </button>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <ReportButton targetType="post" targetId={post.id} compact />
+                      {founder && !post.id.startsWith("official_") && (
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-danger hover:bg-danger/10"
+                          onClick={() => {
+                            if (!confirm("Bu mesaj silinsin mi?")) return;
+                            deletePost(post.id);
+                            toast.success("Mesaj silindi");
+                          }}
+                        >
+                          <Trash2 className="size-3" />
+                          Sil
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div className="text-sm leading-relaxed whitespace-pre-wrap text-fg">
                     {renderBody(post.body)}
@@ -329,6 +346,13 @@ function ThreadPage() {
       ) : thread.status === "pending" && !founder ? (
         <p className="mt-5 rounded-lg border border-border bg-surface px-4 py-6 text-center text-sm text-muted shadow-card">
           İncelemedeki konulara henüz cevap yazılamaz.
+        </p>
+      ) : !user ? (
+        <p className="mt-5 rounded-lg border border-border bg-surface px-4 py-6 text-center text-sm text-muted shadow-card">
+          Giriş yaparak cevap yazabilirsiniz.{" "}
+          <Link to="/login" className="font-medium text-primary hover:underline">
+            Giriş / Kayıt
+          </Link>
         </p>
       ) : (
         <form

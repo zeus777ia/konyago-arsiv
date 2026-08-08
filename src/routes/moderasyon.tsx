@@ -10,6 +10,8 @@ import { useForumStore } from "@/lib/forum/store";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { isFounder } from "@/lib/staff/founder";
 import { formatRelative } from "@/lib/utils";
+import { useReportsStore } from "@/lib/reports/store";
+import { SAFETY } from "@/lib/safety/content";
 
 export const Route = createFileRoute("/moderasyon")({
   component: ModerationPage,
@@ -24,6 +26,8 @@ function ModerationPage() {
   const approveThread = useForumStore((s) => s.approveThread);
   const rejectThread = useForumStore((s) => s.rejectThread);
   const deleteThread = useForumStore((s) => s.deleteThread);
+  const reports = useReportsStore((s) => s.reports);
+  const markReviewed = useReportsStore((s) => s.markReviewed);
 
   if (!founder) {
     return <Navigate to="/" />;
@@ -33,6 +37,7 @@ function ModerationPage() {
     .filter((t) => t.status === "pending")
     .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
 
+  const openReports = reports.filter((r) => r.status === "open");
   const rejected = threads.filter((t) => t.status === "rejected").length;
   const approved = threads.filter(
     (t) => !t.status || t.status === "approved",
@@ -47,11 +52,12 @@ function ModerationPage() {
             Moderasyon merkezi
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-muted">
-            İnceleme kuyruğu, onay/red işlemleri ve otomatik filtre özeti.
+            İnceleme kuyruğu, kullanıcı bildirimleri ve onay süreci.
           </p>
         </div>
         <div className="flex gap-2 text-center text-xs">
           <StatChip label="Bekleyen" value={pending.length} accent />
+          <StatChip label="Bildirim" value={openReports.length} accent />
           <StatChip label="Yayında" value={approved} />
           <StatChip label="Red" value={rejected} />
         </div>
@@ -67,22 +73,22 @@ function ModerationPage() {
             {
               n: "1",
               t: "Gönderim",
-              d: "Üye konuyu oluşturur. Honeypot ve form doğrulaması uygulanır.",
+              d: "Üye giriş yapar; honeypot + form süresi kontrol edilir.",
             },
             {
               n: "2",
-              t: "Otomatik filtre",
-              d: "+18, küfür, cinsellik, madde, telif, spam (hız, tekrar, link, CAPS) taranır. Aykırıysa içerik hiç oluşmaz.",
+              t: "8 katman spam + içerik filtresi",
+              d: "Risk skoru, kalıp, benzerlik, hız limitleri; +18/küfür/telif ayrı engellenir.",
             },
             {
               n: "3",
               t: "İncelemede",
-              d: "Geçen konular “pending” olur; genel listelerde gizli. Yalnızca yazar ve kurucu görür. Cevap kapalıdır.",
+              d: "Listelerde gizli; yazar ve kurucu görür. Cevap kapalı.",
             },
             {
               n: "4",
               t: "Karar",
-              d: "Onayla → kamuya açık yayında. Reddet → kilitli + red nedeni. Sil → kalıcı kaldırma.",
+              d: "Onayla → yayında. Reddet → kilit. Sil → kalıcı. Bildirimler ayrı incelenir.",
             },
           ].map((s) => (
             <li
@@ -97,11 +103,6 @@ function ModerationPage() {
             </li>
           ))}
         </ol>
-        <p className="mt-3 text-[11px] text-subtle">
-          Duyurular kategorisi bu kuyruğa düşmez; yalnızca kurucu yayımlar.
-          Resmî konular silinemez. Spam koruması kurucu paylaşımlarına
-          uygulanmaz.
-        </p>
       </section>
 
       <h2 className="mb-3 text-sm font-semibold text-fg">
@@ -109,7 +110,7 @@ function ModerationPage() {
       </h2>
 
       {pending.length === 0 ? (
-        <div className="rounded-lg border border-border bg-surface px-4 py-10 text-center text-sm text-muted shadow-card">
+        <div className="rounded-lg border border-border bg-surface px-4 py-8 text-center text-sm text-muted shadow-card">
           İncelemede bekleyen konu yok.
         </div>
       ) : (
@@ -185,6 +186,52 @@ function ModerationPage() {
                     </Button>
                   </div>
                 </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      <h2 className="mt-8 mb-3 text-sm font-semibold text-fg">
+        Kullanıcı bildirimleri ({openReports.length} açık)
+      </h2>
+      {openReports.length === 0 ? (
+        <div className="rounded-lg border border-border bg-surface px-4 py-8 text-center text-sm text-muted shadow-card">
+          Açık bildirim yok.
+        </div>
+      ) : (
+        <ul className="space-y-2">
+          {openReports.map((r) => {
+            const reasonLabel =
+              SAFETY.reportReasons.find((x) => x.id === r.reason)?.label ??
+              r.reason;
+            return (
+              <li
+                key={r.id}
+                className="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border bg-surface p-3 shadow-card"
+              >
+                <div className="min-w-0 text-xs">
+                  <p className="font-semibold text-fg">
+                    {r.targetType} · {r.targetId}
+                  </p>
+                  <p className="mt-0.5 text-muted">
+                    {reasonLabel} · {r.reporterName} ·{" "}
+                    {formatRelative(r.createdAt)}
+                  </p>
+                  {r.detail && (
+                    <p className="mt-1 text-subtle">{r.detail}</p>
+                  )}
+                </div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    markReviewed(r.id);
+                    toast.message("Bildirim incelendi olarak işaretlendi");
+                  }}
+                >
+                  İncelendi
+                </Button>
               </li>
             );
           })}

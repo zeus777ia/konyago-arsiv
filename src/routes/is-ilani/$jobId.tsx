@@ -14,6 +14,7 @@ import { useJobsStore } from "@/lib/jobs/store";
 import { formatRelative } from "@/lib/utils";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { isFounder } from "@/lib/staff/founder";
+import { ReportButton } from "@/components/forum/report-button";
 
 export const Route = createFileRoute("/is-ilani/$jobId")({
   component: JobDetailPage,
@@ -69,7 +70,10 @@ function JobDetailPage() {
               </span>
             )}
           </div>
-          <h1 className="text-xl font-semibold tracking-tight">{job.title}</h1>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <h1 className="text-xl font-semibold tracking-tight">{job.title}</h1>
+            <ReportButton targetType="job" targetId={job.id} />
+          </div>
           <p className="mt-1 text-sm text-muted">{job.companyOrPerson}</p>
           <p className="mt-2 flex flex-wrap items-center gap-1 text-xs text-subtle">
             <MapPin className="size-3.5" />

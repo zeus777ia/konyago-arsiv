@@ -87,8 +87,11 @@ export async function registerMember(input: {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
     return { ok: false, error: "Geçerli bir e-posta girin" };
   }
-  if (input.password.length < 6) {
-    return { ok: false, error: "Şifre en az 6 karakter olmalı" };
+  if (input.password.length < 8) {
+    return { ok: false, error: "Şifre en az 8 karakter olmalı" };
+  }
+  if (!/[A-Za-z]/.test(input.password) || !/[0-9]/.test(input.password)) {
+    return { ok: false, error: "Şifre en az bir harf ve bir rakam içermelidir" };
   }
   if (input.displayName.trim().length < 2) {
     return { ok: false, error: "Görünen ad en az 2 karakter" };
@@ -208,8 +211,11 @@ export async function resetPasswordWithCode(input: {
   newPassword: string;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const em = normalizeEmail(input.email);
-  if (input.newPassword.length < 6) {
-    return { ok: false, error: "Yeni şifre en az 6 karakter olmalı" };
+  if (input.newPassword.length < 8) {
+    return { ok: false, error: "Yeni şifre en az 8 karakter olmalı" };
+  }
+  if (!/[A-Za-z]/.test(input.newPassword) || !/[0-9]/.test(input.newPassword)) {
+    return { ok: false, error: "Şifre en az bir harf ve bir rakam içermelidir" };
   }
   const token = useMembersStore
     .getState()
