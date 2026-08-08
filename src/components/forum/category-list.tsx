@@ -8,7 +8,16 @@ import { filterVisibleThreads, useForumStore } from "@/lib/forum/store";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { isFounder } from "@/lib/staff/founder";
 
-export function CategoryList({ filter = "" }: { filter?: string }) {
+/** Ana sayfada "Resmi" grubu OfficialSpotlight ile gösterilir */
+const HIDDEN_HOME_GROUPS = new Set(["Resmi"]);
+
+export function CategoryList({
+  filter = "",
+  hideOfficialGroup = false,
+}: {
+  filter?: string;
+  hideOfficialGroup?: boolean;
+}) {
   const threads = useForumStore((s) => s.threads);
   const posts = useForumStore((s) => s.posts);
   const names = useForumStore((s) => s.names);
@@ -16,6 +25,7 @@ export function CategoryList({ filter = "" }: { filter?: string }) {
   const founder = isFounder(user);
   const q = filter.trim().toLowerCase();
   const groups = categoryGroups()
+    .filter(([group]) => !(hideOfficialGroup && HIDDEN_HOME_GROUPS.has(group)))
     .map(
       ([group, cats]) =>
         [

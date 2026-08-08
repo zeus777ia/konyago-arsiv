@@ -15,6 +15,7 @@ import {
 import { useMarketplaceStore } from "@/lib/marketplace/store";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { moderateContent } from "@/lib/forum/moderation";
+import { recordSpamEvent, runAllSpamChecks } from "@/lib/forum/spam";
 
 export const Route = createFileRoute("/ikinci-el/yeni")({
   component: NewListingPage,
@@ -32,6 +33,7 @@ function NewListingPage() {
   const [priceNote, setPriceNote] = useState("");
   const [contact, setContact] = useState("");
   const [accepted, setAccepted] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +53,11 @@ function NewListingPage() {
       toast.error("Kuralları onaylamanız gerekiyor");
       return;
     }
+    const spam = runAllSpamChecks({ kind: "listing", title, body: description, honeypot });
+    if (!spam.ok) {
+      toast.error(spam.reason);
+      return;
+    }
     const mod = moderateContent(title, description + " " + priceNote);
     if (!mod.ok) {
       toast.error(mod.reason);
@@ -66,6 +73,7 @@ function NewListingPage() {
       contact,
       authorName: user?.displayName ?? "Misafir",
     });
+    recordSpamEvent("listing", title + "\n" + description);
     toast.success("İlan yayınlandı");
     void navigate({ to: "/ikinci-el/$listingId", params: { listingId: id } });
   };
@@ -93,8 +101,11 @@ function NewListingPage() {
 
         <form
           onSubmit={submit}
-          className="space-y-4 rounded-lg border border-border bg-surface p-4 shadow-card sm:p-5"
+          className="relative space-y-4 rounded-lg border border-border bg-surface p-4 shadow-card sm:p-5"
         >
+          <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden>
+            <input tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+          </div>
           <h1 className="text-lg font-semibold">İkinci el ilanı</h1>
           <Field label="Başlık">
             <input

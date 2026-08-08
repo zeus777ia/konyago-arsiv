@@ -14,6 +14,7 @@ import {
 import { useJobsStore } from "@/lib/jobs/store";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { moderateContent } from "@/lib/forum/moderation";
+import { recordSpamEvent, runAllSpamChecks } from "@/lib/forum/spam";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/is-ilani/yeni")({
@@ -33,6 +34,7 @@ function NewJobPage() {
   const [contact, setContact] = useState("");
   const [salaryNote, setSalaryNote] = useState("");
   const [accepted, setAccepted] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +52,11 @@ function NewJobPage() {
     }
     if (!accepted) {
       toast.error("Kuralları onaylayın");
+      return;
+    }
+    const spam = runAllSpamChecks({ kind: "job", title, body: description, honeypot });
+    if (!spam.ok) {
+      toast.error(spam.reason);
       return;
     }
     const mod = moderateContent(title, description + " " + salaryNote);
@@ -70,6 +77,7 @@ function NewJobPage() {
       salaryNote: salaryNote || "Görüşülür",
       authorName: user?.displayName ?? "Misafir",
     });
+    recordSpamEvent("job", title + "\n" + description);
     toast.success("İlan yayınlandı");
     void navigate({ to: "/is-ilani/$jobId", params: { jobId: id } });
   };

@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import type { Post, Thread, ThreadStatus } from "./data";
 import { ensureOfficialContent } from "./official-seed";
 import { canPostInCategory, moderateContent } from "./moderation";
+import { recordSpamEvent, runAllSpamChecks } from "./spam";
 
 export type AddThreadResult =
   | { ok: true; threadId: string; status: ThreadStatus }
@@ -22,12 +23,14 @@ type ForumState = {
     body: string;
     authorName: string;
     asFounder?: boolean;
+    honeypot?: string;
   }) => AddThreadResult;
   addReply: (input: {
     threadId: string;
     body: string;
     authorName: string;
     asFounder?: boolean;
+    honeypot?: string;
   }) => AddReplyResult;
   bumpViews: (threadId: string) => void;
   deleteThread: (threadId: string) => void;
@@ -52,12 +55,6 @@ export const useForumStore = create<ForumState>()(
       seededOfficial: false,
       ensureSeed: () => {
         const state = get();
-        if (
-          state.seededOfficial &&
-          state.threads.some((t) => t.id === "official_rules")
-        ) {
-          return;
-        }
         const next = ensureOfficialContent(
           state.threads,
           state.posts,
@@ -70,9 +67,26 @@ export const useForumStore = create<ForumState>()(
           seededOfficial: true,
         });
       },
-      addThread: ({ categoryId, title, body, authorName, asFounder }) => {
+      addThread: ({
+        categoryId,
+        title,
+        body,
+        authorName,
+        asFounder,
+        honeypot,
+      }) => {
         const catOk = canPostInCategory(categoryId, !!asFounder);
         if (!catOk.ok) return { ok: false, error: catOk.reason };
+
+        if (!asFounder) {
+          const spam = runAllSpamChecks({
+            kind: "thread",
+            title,
+            body,
+            honeypot,
+          });
+          if (!spam.ok) return { ok: false, error: spam.reason };
+        }
 
         const mod = moderateContent(title, body);
         if (!mod.ok) {
@@ -109,9 +123,12 @@ export const useForumStore = create<ForumState>()(
           posts: [...get().posts, post],
           names: { ...get().names, [authorId]: authorName },
         });
+        if (!asFounder) {
+          recordSpamEvent("thread", `${title}\n${body}`);
+        }
         return { ok: true, threadId, status };
       },
-      addReply: ({ threadId, body, authorName, asFounder }) => {
+      addReply: ({ threadId, body, authorName, asFounder, honeypot }) => {
         const thread = get().threads.find((t) => t.id === threadId);
         if (!thread) return { ok: false, error: "Konu bulunamadı" };
         if (thread.locked && !asFounder) {
@@ -125,6 +142,15 @@ export const useForumStore = create<ForumState>()(
         }
         if (thread.status === "rejected") {
           return { ok: false, error: "Reddedilmiş konuya cevap yazılamaz" };
+        }
+
+        if (!asFounder) {
+          const spam = runAllSpamChecks({
+            kind: "reply",
+            body,
+            honeypot,
+          });
+          if (!spam.ok) return { ok: false, error: spam.reason };
         }
 
         const mod = moderateContent("", body);
@@ -153,6 +179,7 @@ export const useForumStore = create<ForumState>()(
               : t,
           ),
         });
+        if (!asFounder) recordSpamEvent("reply", body);
         return { ok: true };
       },
       bumpViews: (threadId) => {

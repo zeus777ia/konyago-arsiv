@@ -10,7 +10,7 @@ export const OFFICIAL_THREADS: Thread[] = [
   {
     id: "official_announcement",
     categoryId: "duyurular",
-    title: "Duyuru: Site açılışı ve işleyiş",
+    title: "Resmî duyuru: Platform açılışı ve işleyiş",
     authorId: FOUNDER_AUTHOR_ID,
     createdAt: NOW,
     lastPostAt: NOW,
@@ -24,7 +24,7 @@ export const OFFICIAL_THREADS: Thread[] = [
   {
     id: "official_rules",
     categoryId: "duyurular",
-    title: "Forum Kuralları (zorunlu okuyun)",
+    title: "Platform Kullanım Kuralları (yürürlükteki metin)",
     authorId: FOUNDER_AUTHOR_ID,
     createdAt: NOW,
     lastPostAt: NOW,
@@ -63,33 +63,35 @@ export function ensureOfficialContent(
   posts: Post[],
   names: Record<string, string>,
 ): { threads: Thread[]; posts: Post[]; names: Record<string, string> } {
-  const ids = new Set(threads.map((t) => t.id));
-  const pids = new Set(posts.map((p) => p.id));
-  const nextThreads = [...threads];
-  const nextPosts = [...posts];
+  const byId = new Map(threads.map((t) => [t.id, t]));
   for (const t of OFFICIAL_THREADS) {
-    if (!ids.has(t.id)) nextThreads.unshift(t);
-    else {
-      // resmi konuları güncel tut (kilit/pin)
-      const i = nextThreads.findIndex((x) => x.id === t.id);
-      if (i >= 0) {
-        nextThreads[i] = {
-          ...nextThreads[i]!,
-          pinned: true,
-          locked: true,
-          status: "approved",
-          title: t.title,
-        };
-      }
-    }
+    const prev = byId.get(t.id);
+    byId.set(t.id, {
+      ...(prev ?? t),
+      ...t,
+      views: prev?.views ?? t.views,
+      pinned: true,
+      locked: true,
+      status: "approved",
+    });
   }
+  // official first, then others
+  const officialIds = new Set(OFFICIAL_THREADS.map((t) => t.id));
+  const rest = threads.filter((t) => !officialIds.has(t.id));
+  const nextThreads = [
+    ...OFFICIAL_THREADS.map((t) => byId.get(t.id)!),
+    ...rest,
+  ];
+
+  const postById = new Map(posts.map((p) => [p.id, p]));
   for (const p of OFFICIAL_POSTS) {
-    if (!pids.has(p.id)) nextPosts.push(p);
-    else {
-      const i = nextPosts.findIndex((x) => x.id === p.id);
-      if (i >= 0) nextPosts[i] = { ...nextPosts[i]!, body: p.body };
-    }
+    postById.set(p.id, { ...p }); // always refresh body
   }
+  const nextPosts = [
+    ...OFFICIAL_POSTS,
+    ...posts.filter((p) => !OFFICIAL_POSTS.some((o) => o.id === p.id)),
+  ];
+
   return {
     threads: nextThreads,
     posts: nextPosts,

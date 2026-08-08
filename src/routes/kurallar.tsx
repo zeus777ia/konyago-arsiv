@@ -8,17 +8,19 @@ export const Route = createFileRoute("/kurallar")({
 
 function RulesPage() {
   return (
-    <LegalLayout title="Forum Kuralları">
+    <LegalLayout title="Platform Kullanım Kuralları">
       <p className="text-sm text-muted">
-        Son güncelleme: {RULES_UPDATED}. Bu metin aynı zamanda{" "}
+        Yürürlük / son güncelleme: <strong className="text-fg">{RULES_UPDATED}</strong>.
+        İşbu metin{" "}
         <Link
           to="/konu/$threadId"
           params={{ threadId: "official_rules" }}
           className="text-primary hover:underline"
         >
-          Duyurular & Kurallar
+          Duyurular ve Kurallar
         </Link>{" "}
-        bölümünde sabitlenmiştir. Üyelik kuralları kabul anlamına gelir.
+        kapsamında da sabitlenmiştir. Üyelik ve içerik paylaşımı kabul anlamına
+        gelir.
       </p>
 
       {RULE_SECTIONS.map((s) => (
@@ -31,15 +33,17 @@ function RulesPage() {
         </Section>
       ))}
 
-      <Section title="Hızlı özet">
-        <ul className="list-disc space-y-1 pl-5">
-          <li>Duyurular & Kurallar’a üye konu açamaz.</li>
-          <li>Yeni konular incelemeye alınır.</li>
+      <Section title="Moderasyon onay özeti">
+        <ol className="list-decimal space-y-1 pl-5">
+          <li>Üye konuyu gönderir.</li>
+          <li>Otomatik içerik ve spam filtreleri çalışır; aykırı içerik oluşmaz.</li>
           <li>
-            +18, küfür, cinsellik, alkol/uyuşturucu, telif ihlali otomatik silinir
-            / engellenir.
+            Uygun içerik “İncelemede” kalır; genel listelerde görünmez.
           </li>
-        </ul>
+          <li>
+            Kurucu onaylar → yayında; reddeder → kilitlenir; siler → kalıcı kaldırılır.
+          </li>
+        </ol>
       </Section>
     </LegalLayout>
   );

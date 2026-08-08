@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ForumShell } from "@/components/forum/layout";
 import { ForumSidebar } from "@/components/forum/sidebar";
 import { HomeHubs } from "@/components/forum/home-hubs";
+import { OfficialSpotlight } from "@/components/forum/official-spotlight";
 import {
   CategoryList,
   LatestThreadsTable,
@@ -18,9 +19,10 @@ function HomePage() {
   return (
     <ForumShell search={search} onSearch={setSearch}>
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="space-y-5 min-w-0">
+        <div className="min-w-0 space-y-5">
+          <OfficialSpotlight />
           <HomeHubs />
-          <CategoryList filter={search} />
+          <CategoryList filter={search} hideOfficialGroup />
           <LatestThreadsTable filter={search} />
         </div>
         <div className="min-w-0">

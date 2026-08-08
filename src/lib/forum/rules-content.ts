@@ -1,4 +1,4 @@
-/** Duyurular & Kurallar — resmî kural metni (sabit / kilitli konular) */
+/** Duyurular ve Kurallar — resmî platform metni */
 
 export const RULES_UPDATED = "9 Ağustos 2026";
 
@@ -11,138 +11,134 @@ export type RuleSection = {
 export const RULE_SECTIONS: RuleSection[] = [
   {
     id: "genel",
-    title: "1. Genel ilkeler",
+    title: "Madde 1 — Amaç, kapsam ve nitelik",
     items: [
-      "KonyaGo Arşiv bağımsız bir topluluk forumudur; resmî bir kamu kurumu sitesi değildir.",
-      "Üyelik ile tüm kuralları okumuş ve kabul etmiş sayılırsınız.",
-      "Site yönetimi (kurucu) kuralları güncelleme, içeriği kaldırma ve hesap kısıtlama hakkını saklı tutar.",
-      "Türkçe iletişim esastır; argo ve hakaret yasaktır.",
-      "Diğer üyelere saygı gösterin. Kişisel saldırı, linç ve ayrımcılık kabul edilmez.",
+      "İşbu Kurallar, konyagoarsiv.org alan adlı KonyaGo Arşiv platformunun (“Platform”) kullanım koşullarını düzenler.",
+      "Platform; bağımsız bir topluluk arşivi, forum ve ilan panosudur. Herhangi bir kamu kurumu, belediye, valilik veya resmî mercinin web sitesi değildir.",
+      "Platform’a üye olmak, içerik paylaşmak veya hizmetlerden yararlanmak, işbu Kuralların tamamının okunmuş ve kabul edilmiş sayılması sonucunu doğurur.",
+      "Platform işletmecisi, Kuralları önceden duyurmak kaydıyla değiştirme, güncelleme ve yürürlüğe koyma yetkisini haizdir. Güncel metin sitede yayımlandığı tarihte yürürlüğe girer.",
+      "İletişim dili Türkçe’dir. Üyeler, diğer kullanıcılara karşı nezaket ve saygı çerçevesinde davranmakla yükümlüdür.",
     ],
   },
   {
     id: "uyelik",
-    title: "2. Üyelik ve hesap güvenliği",
+    title: "Madde 2 — Üyelik, hesap ve güvenlik",
     items: [
-      "Her gerçek kişi kural olarak bir hesap kullanmalıdır.",
-      "Sahte kimlik, taklit üye adı veya kurucuyu taklit etmek yasaktır.",
-      "Şifrenizi kimseyle paylaşmayın; şüpheli durumda şifrenizi yenileyin.",
-      "18 yaş altı kullanıcıların veli/vasi onayı olmadan üye olması uygun değildir.",
-      "Hesap satışı, kiralanması veya devri yasaktır.",
+      "Her gerçek kişi, kural olarak tek bir üyelik hesabı oluşturabilir ve kullanabilir.",
+      "Yanıltıcı kimlik bilgisi, sahte hesap, başka bir kişiyi veya kurucuyu taklit eden üye adı kullanılması yasaktır.",
+      "Hesap güvenliğinden üye sorumludur. Şifrelerin üçüncü kişilerle paylaşılması tavsiye edilmez; şüphe hâlinde şifre yenilenmelidir.",
+      "On sekiz (18) yaşını doldurmamış kişilerin, yasal temsilci onayı olmaksızın üye olmaları uygun değildir.",
+      "Hesapların satışı, kiralanması, devri veya ticari amaçla toplu oluşturulması yasaktır.",
+      "Kurucu görünen adı (KonyaGoArşiv) ve KURUCU unvanı münhasıran platform yönetimine aittir.",
     ],
   },
   {
     id: "icerik",
-    title: "3. İçerik kuralları (zorunlu)",
+    title: "Madde 3 — Yasak içerikler",
     items: [
-      "+18, NSFW, müstehcen veya cinsel içerik kesinlikle yasaktır; otomatik engellenir.",
-      "Küfür, hakaret, aşağılama ve nefret söylemi yasaktır; otomatik engellenir.",
-      "Alkol satışı / teşviki ve her türlü uyuşturucu maddesi içeriği yasaktır; otomatik engellenir.",
-      "Telif hakkı ihlali (korsan yazılım, crack, illegal film/dizi/müzik indirme) yasaktır; otomatik engellenir.",
-      "Şiddet, silah satışı, yasadışı faaliyet planı veya teşviki yasaktır.",
-      "Spam, zincir mesaj, aşırı büyük harf ve konuyu saptıran flood yasaktır.",
-      "Yanıltıcı başlık, tık tuzağı ve sahte duyuru yasaktır.",
-      "Kişisel verileri (TC, adres, özel telefon vb.) izinsiz paylaşmak yasaktır.",
+      "On sekiz yaş üstü (+18), müstehcen, cinsel veya pornografik nitelikteki her türlü içerik yasaktır; sistem tarafından otomatik olarak engellenir.",
+      "Küfür, hakaret, aşağılama, nefret söylemi, ayrımcılık ve kişilik haklarına saldırı yasaktır; otomatik engellenir.",
+      "Alkolün ticareti veya teşviki ile uyuşturucu ve uyarıcı maddelere ilişkin her türlü içerik yasaktır; otomatik engellenir.",
+      "Telif ve bağlantılı hakları ihlal eden içerikler (korsan yazılım, crack, izinsiz film/dizi/müzik dağıtımı vb.) yasaktır; otomatik engellenir.",
+      "Şiddet, silah ticareti, yasadışı faaliyetin planlanması veya teşviki yasaktır.",
+      "Kişisel verilerin (T.C. kimlik numarası, özel adres, gizli iletişim bilgisi vb.) rıza olmaksızın ifşası yasaktır.",
+      "Yanıltıcı başlık, tık tuzağı, sahte duyuru ve bilinçli dezenformasyon yasaktır.",
+    ],
+  },
+  {
+    id: "spam",
+    title: "Madde 4 — Spam ve kötüye kullanım koruması",
+    items: [
+      "Platform; flood, zincir mesaj, anlamsız karakter tekrarı, aşırı büyük harf, link bombardımanı ve reklam kalıplarına karşı otomatik spam koruması uygular.",
+      "Kısa süre içinde aşırı sayıda paylaşım yapan hesaplar geçici olarak sınırlandırılabilir (soğuma süresi, saatlik limit).",
+      "Aynı veya özdeş içeriğin tekrar yayımı engellenir.",
+      "İzinsiz ticari reklam, affiliate link yığını, dolandırıcılık vaadi ve “hızlı kazanç” içerikleri yasaktır.",
+      "Otomatik botlar ve form tuzak alanlarını dolduran istekler reddedilir.",
+      "Spam koruması ihlali, içeriğin yayımlanmaması ve gerektiğinde hesap yaptırımı ile sonuçlanır.",
     ],
   },
   {
     id: "inceleme",
-    title: "4. Konu inceleme süreci",
+    title: "Madde 5 — Moderasyon ve onay süreci",
     items: [
-      "Açılan yeni konular önce “incelemede” durumuna alınır; onaylanmadan herkese açık listelerde görünmez.",
-      "Kurucu onayı sonrası konu yayınlanır.",
-      "Kurallara aykırı içerik otomatik reddedilir veya silinir; itiraz için info@konyago.com.tr yazabilirsiniz.",
-      "Duyurular & Kurallar bölümüne yalnızca kurucu konu açabilir; üyeler bu bölüme konu açamaz.",
+      "Üyeler tarafından açılan yeni forum konuları, yayına girmeden önce “İncelemede” statüsüne alınır.",
+      "İnceleme aşamasındaki konular, genel listelerde ve kategori özetlerinde herkese açık görünmez; yalnızca yazar ve yetkili moderasyon (kurucu) tarafından görülebilir.",
+      "Kurucu; içeriği Kurallara uygun bulursa “Onayla” işlemi ile konuyu “Yayında” statüsüne yükseltir. Onay sonrası konu kamuya açık hâle gelir.",
+      "Kurallara aykırılık, spam veya uygun olmama hâlinde konu “Reddedildi” statüsüne alınabilir veya kalıcı olarak silinebilir. Red nedeni sistemde kayıt altına alınabilir.",
+      "Otomatik filtre (+18, küfür, cinsellik, madde, telif, spam) devreye girdiğinde içerik hiç oluşturulmaz; kullanıcıya gerekçeli red mesajı gösterilir.",
+      "İncelemedeki konulara (kurucu hariç) cevap yazılamaz. Kilitli konulara üye cevabı kapalıdır.",
+      "Duyurular ve Kurallar kategorisine yalnızca kurucu konu açabilir; üyelerin bu bölüme konu açması teknik ve idari olarak engellenmiştir.",
+      "Moderasyon kuyruğu kurucu paneli üzerinden yönetilir. Ortalama inceleme süresi iş yüküne bağlıdır; acil güvenlik bildirimleri info@konyago.com.tr adresine iletilmelidir.",
+      "Yaptırım kademeleri: uyarı → içeriğin kaldırılması → geçici kısıtlama → kalıcı erişim engeli. Ağır ihlallerde doğrudan kalıcı engel uygulanabilir.",
     ],
   },
   {
     id: "forum",
-    title: "5. Forum kullanımı",
+    title: "Madde 6 — Forum kullanımı",
     items: [
-      "Konuyu doğru kategoriye açın; yanlış kategorideki konular taşınabilir veya kapatılabilir.",
-      "Aynı konuda mükerrer başlık açmayın; önce arama yapın.",
-      "Alıntı yaparken kaynağı belirtin; kopyala-yapıştır spam yasaktır.",
-      "Tartışmalarda konuyu dağıtmayın; kişisel mesajlaşmayı konu dışına taşıyın.",
-      "Kilitli konulara (kurucu hariç) cevap yazılamaz.",
-      "Sabitlenmiş konular yönetim duyurusu niteliğindedir; lütfen okuyun.",
+      "Konular, içeriğe uygun kategoriye açılmalıdır. Yanlış kategorideki başlıklar taşınabilir, birleştirilebilir veya kapatılabilir.",
+      "Mükerrer konu açılmadan önce arama yapılması esastır.",
+      "Alıntılarda kaynak gösterilmesi; kopyala-yapıştır spam yasağı geçerlidir.",
+      "Sabitlenmiş konular yönetim duyurusu niteliğindedir ve öncelikle okunmalıdır.",
+      "Tartışmalarda konu dışına çıkılması ve kişisel saldırıya dönüşmesi hâlinde konu kilitlenebilir.",
     ],
   },
   {
     id: "ikinci-el",
-    title: "6. İkinci el panosu",
+    title: "Madde 7 — İkinci el panosu",
     items: [
-      "Sitede ödeme, komisyon veya eskort işlem yapılmaz; ticaret site dışındadır.",
-      "Yalnızca yasal ürünler ilan edilebilir. Çalıntı, sahte veya yasadışı ürün yasaktır.",
-      "İletişim bilginizi bilinçli paylaşın; dolandırıcılığa karşı yüz yüze ve güvenli buluşun.",
-      "İlan metninde küfür, +18 veya yasadışı içerik olamaz (otomatik engel).",
-      "Satılan ilanı “satıldı” olarak işaretleyin veya kaldırın.",
+      "İkinci el bölümü yalnızca ilan panosudur. Platform üzerinde ödeme, tahsilat, komisyon veya eskort işlem yapılmaz.",
+      "Yalnızca yasal ürünler ilan edilebilir. Çalıntı, sahte veya yasadışı emtia yasaktır.",
+      "Alıcı ile satıcı arasındaki anlaşma, teslimat ve uyuşmazlıklar tarafların kendi sorumluluğundadır.",
+      "İlan metinleri Madde 3 ve Madde 4 kapsamındaki otomatik denetimden geçer.",
     ],
   },
   {
     id: "is",
-    title: "7. İş panosu",
+    title: "Madde 8 — İş panosu",
     items: [
-      "İşveren ve iş arayan ilanları bilgilendirme panosudur; sitede maaş ödemesi yoktur.",
-      "Sahte iş ilanı, avans dolandırıcılığı ve yasadışı iş teklifleri yasaktır.",
-      "Ayrımcı (ırk, din, cinsiyet vb.) ilan metinleri kabul edilmez.",
-      "İletişim ve görüşme site dışında, tarafların sorumluluğundadır.",
-    ],
-  },
-  {
-    id: "reklam",
-    title: "8. Reklam ve tanıtım",
-    items: [
-      "İzinsiz ticari reklam, affiliate link bombardımanı ve DM spam yasaktır.",
-      "Kendi projenizi tanıtmak istiyorsanız ilgili kategoride abartısız ve tek seferlik paylaşın.",
-      "Rakip siteleri kötüleme veya yanıltıcı karşılaştırma yapmayın.",
+      "İş ilanları bilgilendirme amaçlıdır; Platform maaş ödemesi, aracılık komisyonu veya istihdam garantisi sunmaz.",
+      "Sahte ilan, avans dolandırıcılığı ve yasadışı iş teklifleri yasaktır.",
+      "Ayrımcı ilan metinleri kabul edilmez. Görüşme ve sözleşme site dışında yürütülür.",
     ],
   },
   {
     id: "gizlilik",
-    title: "9. Gizlilik ve KVKK",
+    title: "Madde 9 — Gizlilik ve KVKK",
     items: [
-      "Kişisel verileriniz KVKK aydınlatma metni kapsamında işlenir.",
-      "Başkasının özel bilgisini rızası olmadan paylaşmayın (doxxing yasaktır).",
-      "Gizlilik ihlali bildirimleri öncelikli incelenir.",
-      "Detay: /kvkk ve /gizlilik sayfaları.",
-    ],
-  },
-  {
-    id: "yaptirim",
-    title: "10. Yaptırımlar",
-    items: [
-      "Uyarı → içerik silme → geçici kısıtlama → kalıcı ban kademeleri uygulanabilir.",
-      "Ağır ihlallerde (uyuşturucu, telif, cinsel istismar vb.) doğrudan kalıcı ban uygulanır.",
-      "Yasadışı faaliyet şüphesinde yasal mercilere bildirim hakkı saklıdır.",
-      "Ban kaçırma (yeni hesap) tespit edilirse tüm hesaplar kapatılır.",
+      "Kişisel veriler, yayımlanan KVKK Aydınlatma Metni ve Gizlilik Politikası çerçevesinde işlenir.",
+      "Başkasının özel bilgilerinin rıza dışı paylaşılması (doxxing) yasaktır ve ağır ihlal sayılır.",
+      "KVKK m.11 kapsamındaki talepler info@konyago.com.tr adresine iletilebilir.",
     ],
   },
   {
     id: "sorumluluk",
-    title: "11. Sorumluluk reddi",
+    title: "Madde 10 — Sorumluluk ve uyuşmazlık",
     items: [
-      "Kullanıcı içeriklerinden içerik sahibi sorumludur.",
-      "İkinci el ve iş anlaşmalarından platform sorumlu değildir.",
-      "Hizmet “olduğu gibi” sunulur; kesintisiz çalışma garanti edilmez.",
-      "Yasal uyarı: /yasal-uyari",
+      "Kullanıcı tarafından üretilen içeriklerden hukuki ve cezai sorumluluk içerik sahibine aittir.",
+      "İkinci el ve iş panosu işlemlerinden Platform taraf değildir.",
+      "Hizmet “olduğu gibi” sunulur; kesintisiz veya hatasız çalışma taahhüt edilmez.",
+      "İşbu metinden doğan uyuşmazlıklarda Türkiye Cumhuriyeti hukuku ve yetkili Konya mahkemeleri / icra daireleri uygulanır (kanunen zorunlu haller saklıdır).",
     ],
   },
   {
     id: "iletisim",
-    title: "12. İletişim ve şikâyet",
+    title: "Madde 11 — Bildirim ve iletişim",
     items: [
-      "Kural ihlali, telif ve KVKK talepleri: info@konyago.com.tr",
-      "Acil güvenlik bildirimlerinde konuyu ve bağlantıyı mailde belirtin.",
-      "Kurucu görünen adı: KonyaGoArşiv (KURUCU rozetli).",
+      "Kural ihlali, telif, güvenlik ve KVKK başvuruları: info@konyago.com.tr",
+      "Bildirimde konu bağlantısı ve kısa açıklama bulunması inceleme sürecini hızlandırır.",
+      "Resmî duyurular ana sayfa ve Duyurular bölümünde yayımlanır.",
     ],
   },
 ];
 
 export function buildRulesBody(): string {
   const lines: string[] = [
-    `Son güncelleme: ${RULES_UPDATED}`,
+    `Yürürlük tarihi / son güncelleme: ${RULES_UPDATED}`,
     "",
-    "Aşağıdaki kurallar KonyaGo Arşiv’in tüm bölümleri (forum, ikinci el, iş panosu) için geçerlidir. Üyelik ve içerik paylaşımı bu metnin kabulü anlamına gelir.",
+    "KonyaGo Arşiv Platform Kullanım Kuralları",
+    "",
+    "Aşağıdaki hükümler forum, ikinci el ve iş panosu dâhil Platform’un tüm bölümleri için geçerlidir. Üyelik ve içerik paylaşımı, işbu metnin kabulü anlamına gelir.",
     "",
   ];
   for (const s of RULE_SECTIONS) {
@@ -154,24 +150,35 @@ export function buildRulesBody(): string {
   }
   lines.push(
     "—",
-    "Bu metin Duyurular & Kurallar bölümünde sabitlenmiştir. Bu bölüme yalnızca kurucu konu açabilir.",
+    "Bu metin Duyurular ve Kurallar kapsamında sabitlenmiş olup, anılan kategoriye yalnızca kurucu tarafından konu açılabilir.",
+    "Moderasyon onayı ve spam koruması teknik olarak uygulanmaktadır.",
   );
   return lines.join("\n");
 }
 
 export function buildAnnouncementBody(): string {
   return [
-    "**Hoş geldiniz — KonyaGo Arşiv**",
+    "**Resmî duyuru — Platform işleyişi**",
     "",
-    "Forum, ikinci el ilan ve iş panosu burada bir arada.",
+    "KonyaGo Arşiv kullanıcılarının bilgisine sunulur:",
     "",
-    "1. Lütfen önce **Forum Kuralları** konusunu okuyun.",
-    "2. Yeni konular inceleme kuyruğuna alınır; onay sonrası yayınlanır.",
-    "3. +18, küfür, cinsellik, alkol/uyuşturucu ve telif ihlali otomatik engellenir.",
-    "4. Duyurular & Kurallar bölümüne üye konu açamaz.",
-    "5. Resmî kurum sitesi değiliz — yasal uyarıyı okuyun.",
+    "1. Forum konuları yayına alınmadan önce moderasyon incelemesinden geçer.",
+    "2. +18, küfür, cinsellik, alkol/uyuşturucu, telif ihlali ve spam otomatik engellenir.",
+    "3. Duyurular ve Kurallar bölümüne üye konu açamaz; yalnızca yönetim yayımlar.",
+    "4. Spam koruması: hız sınırı, tekrar engeli, link ve flood denetimi aktiftir.",
+    "5. Platform resmî bir kamu kurumu sitesi değildir.",
     "",
-    "İyi forumlar.",
-    "KonyaGoArşiv · KURUCU",
+    "Ayrıntılar için Forum Kuralları metnini okuyunuz.",
+    "",
+    "Saygılarımızla,",
+    "KonyaGoArşiv — Kurucu",
   ].join("\n");
 }
+
+/** Ana sayfa şeridi için kısa maddeler */
+export const HOME_OFFICIAL_HIGHLIGHTS = [
+  "Yeni konular moderasyon onayından sonra yayına alınır.",
+  "Duyurular ve Kurallar bölümüne üye konu açamaz.",
+  "Spam, +18, küfür ve telif ihlali otomatik engellenir.",
+  "Platform bağımsız topluluk arşividir; resmî kurum sitesi değildir.",
+];

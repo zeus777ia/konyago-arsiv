@@ -41,6 +41,7 @@ function NewTopicPage() {
   const [categoryId, setCategoryId] = useState(defaultCat);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [honeypot, setHoneypot] = useState("");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,15 +59,16 @@ function NewTopicPage() {
       body,
       authorName: user?.displayName ?? "Misafir",
       asFounder: founder,
+      honeypot,
     });
     if (!res.ok) {
       toast.error(res.error);
       return;
     }
     if (res.status === "pending") {
-      toast.message("Konu incelemeye alındı", {
+      toast.message("Konu moderasyon kuyruğuna alındı", {
         description:
-          "Kurucu onayından sonra herkese açık yayınlanır. Kurallara aykırı içerik otomatik reddedilir.",
+          "1) Otomatik filtre geçildi · 2) İncelemede · 3) Kurucu onayı sonrası yayında. Spam koruması aktiftir.",
       });
     } else {
       toast.success("Konu yayınlandı");
@@ -91,22 +93,28 @@ function NewTopicPage() {
       <div className="mx-auto max-w-2xl">
         <h1 className="mb-1 text-xl font-semibold tracking-tight">Yeni konu aç</h1>
         <p className="mb-4 text-sm text-muted">
-          Konular önce incelemeye alınır. +18, küfür, cinsellik, alkol/uyuşturucu
-          ve telif ihlali otomatik engellenir.
+          Konular önce moderasyon incelemesine alınır. Spam koruması (hız sınırı,
+          tekrar, link) ve içerik filtresi aktiftir.
         </p>
 
-        <div className="mb-5 flex gap-2 rounded-lg border border-primary/20 bg-primary-soft px-3 py-2.5 text-xs leading-relaxed text-fg">
-          <ShieldAlert className="mt-0.5 size-4 shrink-0 text-primary" />
-          <p>
-            <strong>Duyurular & Kurallar</strong> bölümüne üye konu açamaz.{" "}
+        <div className="mb-5 space-y-2 rounded-lg border border-primary/20 bg-primary-soft px-3 py-2.5 text-xs leading-relaxed text-fg">
+          <p className="flex gap-2">
+            <ShieldAlert className="mt-0.5 size-4 shrink-0 text-primary" />
+            <span>
+              <strong>Onay süreci:</strong> Gönder → Otomatik filtre → İncelemede
+              (listelerde gizli) → Kurucu onayı → Yayında. Reddedilen konular
+              kilitlenir.
+            </span>
+          </p>
+          <p className="pl-6">
             <Link
-              to="/konu/$threadId"
-              params={{ threadId: "official_rules" }}
+              to="/kurallar"
               className="font-medium text-primary underline-offset-2 hover:underline"
             >
-              Forum kurallarını okuyun
+              Platform Kullanım Kuralları
             </Link>
-            .
+            {" · "}
+            Duyurular bölümüne üye konu açamaz.
           </p>
         </div>
 
@@ -114,6 +122,22 @@ function NewTopicPage() {
           onSubmit={submit}
           className="space-y-4 rounded-lg border border-border bg-surface p-4 shadow-card sm:p-5"
         >
+          {/* Honeypot — botlar doldurursa istek reddedilir */}
+          <div
+            className="absolute -left-[9999px] h-0 w-0 overflow-hidden"
+            aria-hidden
+          >
+            <label>
+              Website
+              <input
+                tabIndex={-1}
+                autoComplete="off"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+              />
+            </label>
+          </div>
+
           <div>
             <label className="mb-1.5 block text-xs font-medium tracking-wide text-muted uppercase">
               Kategori
@@ -153,7 +177,7 @@ function NewTopicPage() {
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={8}
-              placeholder="Deneyiminizi, sorunuzu veya arşiv notunuzu yazın…"
+              placeholder="İçeriğinizi yazın…"
               className="w-full resize-y rounded-md border border-border bg-bg-elevated px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
             />
           </div>

@@ -50,6 +50,7 @@ function ThreadPage() {
   const user = useCurrentUser();
   const founder = isFounder(user);
   const [body, setBody] = useState("");
+  const [honeypot, setHoneypot] = useState("");
 
   const thread = threads.find((t) => t.id === threadId);
   const category = thread ? getCategory(thread.categoryId) : undefined;
@@ -89,6 +90,7 @@ function ThreadPage() {
       body: body.trim(),
       authorName: user?.displayName ?? "Misafir",
       asFounder: founder,
+      honeypot,
     });
     if (!res.ok) {
       toast.error(res.error);
@@ -331,8 +333,11 @@ function ThreadPage() {
       ) : (
         <form
           onSubmit={submit}
-          className="mt-5 rounded-lg border border-border bg-surface p-4 shadow-card"
+          className="relative mt-5 rounded-lg border border-border bg-surface p-4 shadow-card"
         >
+          <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden>
+            <input tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+          </div>
           <h2 className="mb-2 text-sm font-semibold text-fg">Cevap yaz</h2>
           <textarea
             value={body}
