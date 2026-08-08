@@ -26,29 +26,61 @@ export type CurrentUserState = {
 };
 
 function subscribeMembers(cb: () => void) {
-  return useMembersStore.subscribe(cb);
+  const unsubStore = useMembersStore.subscribe(cb);
+  // Re-notify when persist finishes hydrating (session may appear)
+  const unsubHydrate = useMembersStore.persist.onFinishHydration(() => cb());
+  return () => {
+    unsubStore();
+    unsubHydrate();
+  };
 }
 
 function getMemberSession() {
   return useMembersStore.getState().session;
 }
 
+function subscribeHydrated(cb: () => void) {
+  if (useMembersStore.persist.hasHydrated()) {
+    // already done
+  }
+  const unsub = useMembersStore.persist.onFinishHydration(() => cb());
+  return () => {
+    unsub();
+  };
+}
+
+function getMembersHydrated() {
+  return useMembersStore.persist.hasHydrated();
+}
+
+/** true after localStorage rehydrate — avoid false "logged out" redirects */
+export function useMembersHydrated(): boolean {
+  return useSyncExternalStore(
+    subscribeHydrated,
+    getMembersHydrated,
+    () => false,
+  );
+}
+
 /**
  * Prefer local member session (email/password), then Better Auth OAuth.
  */
 export function useCurrentUserState(): CurrentUserState {
+  const hydrated = useMembersHydrated();
   const session = useSyncExternalStore(
     subscribeMembers,
     getMemberSession,
     () => null,
   );
 
-  // Always call the same hooks — order must be stable.
-  // When auth is off, skip useSession via a no-op shape.
   const ba = authEnabled
     ? // eslint-disable-next-line react-hooks/rules-of-hooks
       authClient.useSession()
     : { data: null, isPending: false };
+
+  if (!hydrated) {
+    return { user: null, isPending: true };
+  }
 
   if (session) {
     return {

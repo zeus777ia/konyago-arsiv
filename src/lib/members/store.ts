@@ -200,21 +200,41 @@ export const useMembersStore = create<MembersState>()(
     }),
     {
       name: "konyago-arsiv-members-v3",
-      migrate: (persisted) => {
-        const p = persisted as {
+      version: 4,
+      migrate: (persisted, fromVersion) => {
+        const p = (persisted ?? {}) as {
           members?: Partial<Member>[];
           session?: MemberSession | null;
           resetTokens?: ResetToken[];
         };
         return {
           members: (p.members ?? []).map((m) =>
+            normalizeMember(
+              m as Member & {
+                id: string;
+                email: string;
+                displayName: string;
+                passwordHash: string;
+                createdAt: string;
+              },
+            ),
+          ),
+          session: p.session ?? null,
+          resetTokens: p.resetTokens ?? [],
+        };
+      },
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<MembersState>;
+        return {
+          ...current,
+          ...p,
+          members: (p.members ?? current.members).map((m) =>
             normalizeMember(m as Member),
           ),
           session: p.session ?? null,
           resetTokens: p.resetTokens ?? [],
         };
       },
-      version: 4,
     },
   ),
 );

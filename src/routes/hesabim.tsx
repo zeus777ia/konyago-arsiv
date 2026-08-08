@@ -6,6 +6,7 @@ import {
   Download,
   KeyRound,
   LayoutDashboard,
+  Loader2,
   LogOut,
   Mail,
   Settings2,
@@ -21,13 +22,15 @@ import { ForumShell } from "@/components/forum/layout";
 import { Avatar } from "@/components/forum/avatar";
 import { UserName } from "@/components/forum/user-name";
 import { Button } from "@/components/ui/button";
-import { useCurrentUser } from "@/lib/auth/use-current-user";
+import {
+  useCurrentUserState,
+  useMembersHydrated,
+} from "@/lib/auth/use-current-user";
 import {
   changeEmail,
   changePassword,
   deleteAccount,
   exportMemberData,
-  getSessionMember,
   logoutMember,
   useMembersStore,
   DEFAULT_PREFS,
@@ -107,28 +110,48 @@ function normalizeMember(m: Member): Member {
 }
 
 function AccountPanel() {
-  const user = useCurrentUser();
+  const { user, isPending } = useCurrentUserState();
+  const hydrated = useMembersHydrated();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const member = useMembersStore((s) => {
-    if (!s.session) return null;
-    const m = s.members.find((x) => x.id === s.session!.memberId);
-    return m ? normalizeMember(m as Member) : null;
+
+  const sessionMemberId = useMembersStore((s) => s.session?.memberId ?? null);
+  const rawMember = useMembersStore((s) => {
+    const id = s.session?.memberId;
+    if (!id) return null;
+    return s.members.find((m) => m.id === id) ?? null;
   });
   const updateProfile = useMembersStore((s) => s.updateProfile);
+
+  const fullMember = useMemo(
+    () => (rawMember ? normalizeMember(rawMember as Member) : null),
+    [rawMember],
+  );
 
   const tab = (search.sekme ?? "ozet") as TabId;
   const setTab = (id: TabId) => {
     void navigate({ search: { sekme: id } });
   };
 
+  // Wait for localStorage rehydrate before redirecting
+  if (!hydrated || isPending) {
+    return (
+      <ForumShell>
+        <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3 text-sm text-muted">
+          <Loader2 className="size-6 animate-spin text-primary" />
+          Panel yükleniyor…
+        </div>
+      </ForumShell>
+    );
+  }
+
   if (!user) {
     return <Navigate to="/login" />;
   }
 
   const founder = isFounder(user);
-  const isLocal = !!user.isLocalMember;
-  const fullMember = isLocal ? member : null;
+  const isLocal = !!user.isLocalMember && !!sessionMemberId;
+  const member = isLocal ? fullMember : null;
   const tabs = TABS.filter((t) => !t.localOnly || isLocal);
 
   return (
@@ -230,7 +253,7 @@ function AccountPanel() {
             <OverviewTab
               userName={user.displayName ?? "Üye"}
               email={user.primaryEmail}
-              member={fullMember}
+              member={member}
               founder={founder}
               isLocal={isLocal}
               onGo={setTab}
@@ -239,17 +262,19 @@ function AccountPanel() {
           {tab === "profil" && (
             <ProfileTab
               userName={user.displayName ?? "Üye"}
-              member={fullMember}
+              member={member}
               isLocal={isLocal}
               updateProfile={updateProfile}
             />
           )}
-          {tab === "guvenlik" && isLocal && <SecurityTab />}
+          {tab === "guvenlik" && isLocal && (
+            <SecurityTab email={user.primaryEmail ?? ""} />
+          )}
           {tab === "aktivite" && (
             <ActivityTab displayName={user.displayName ?? ""} />
           )}
-          {tab === "tercihler" && isLocal && fullMember && (
-            <PrefsTab member={fullMember} updateProfile={updateProfile} />
+          {tab === "tercihler" && isLocal && member && (
+            <PrefsTab member={member} updateProfile={updateProfile} />
           )}
           {tab === "tehlike" && isLocal && <DangerTab />}
         </div>
@@ -262,23 +287,18 @@ function PanelCard({
   title,
   description,
   children,
-  action,
 }: {
   title: string;
   description?: string;
   children: React.ReactNode;
-  action?: React.ReactNode;
 }) {
   return (
     <section className="rounded-xl border border-border bg-surface shadow-card">
-      <header className="flex flex-wrap items-start justify-between gap-2 border-b border-border px-4 py-3">
-        <div>
-          <h2 className="text-sm font-semibold text-fg">{title}</h2>
-          {description && (
-            <p className="mt-0.5 text-xs text-muted">{description}</p>
-          )}
-        </div>
-        {action}
+      <header className="border-b border-border px-4 py-3">
+        <h2 className="text-sm font-semibold text-fg">{title}</h2>
+        {description && (
+          <p className="mt-0.5 text-xs text-muted">{description}</p>
+        )}
       </header>
       <div className="p-4">{children}</div>
     </section>
@@ -328,19 +348,22 @@ function OverviewTab({
   const listings = useMarketplaceStore((s) => s.listings);
   const jobs = useJobsStore((s) => s.jobs);
 
-  const myThreadIds = useMemo(() => {
-    return new Set(
-      threads.filter((t) => names[t.authorId] === userName).map((t) => t.id),
-    );
-  }, [threads, names, userName]);
-
-  const threadCount = myThreadIds.size;
-  const postCount = posts.filter((p) => names[p.authorId] === userName).length;
-  const listingCount = listings.filter((l) => l.authorName === userName).length;
-  const jobCount = jobs.filter((j) => j.authorName === userName).length;
-  const pending = threads.filter(
-    (t) => names[t.authorId] === userName && t.status === "pending",
-  ).length;
+  const stats = useMemo(() => {
+    const threadCount = threads.filter(
+      (t) => names[t.authorId] === userName,
+    ).length;
+    const postCount = posts.filter(
+      (p) => names[p.authorId] === userName,
+    ).length;
+    const listingCount = listings.filter(
+      (l) => l.authorName === userName,
+    ).length;
+    const jobCount = jobs.filter((j) => j.authorName === userName).length;
+    const pending = threads.filter(
+      (t) => names[t.authorId] === userName && t.status === "pending",
+    ).length;
+    return { threadCount, postCount, listingCount, jobCount, pending };
+  }, [threads, posts, listings, jobs, names, userName]);
 
   return (
     <div className="space-y-4">
@@ -371,24 +394,24 @@ function OverviewTab({
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <Stat
             label="Konu"
-            value={threadCount}
+            value={stats.threadCount}
             icon={<User className="size-3" />}
           />
-          <Stat label="Mesaj" value={postCount} />
+          <Stat label="Mesaj" value={stats.postCount} />
           <Stat
             label="İkinci el"
-            value={listingCount}
+            value={stats.listingCount}
             icon={<ShoppingBag className="size-3" />}
           />
           <Stat
             label="İş ilanı"
-            value={jobCount}
+            value={stats.jobCount}
             icon={<Briefcase className="size-3" />}
           />
         </div>
-        {pending > 0 && (
+        {stats.pending > 0 && (
           <p className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
-            {pending} konunuz moderasyon incelemesinde.
+            {stats.pending} konunuz moderasyon incelemesinde.
           </p>
         )}
         <div className="mt-4 flex flex-wrap gap-2">
@@ -457,13 +480,15 @@ function ProfileTab({
   updateProfile: ReturnType<typeof useMembersStore.getState>["updateProfile"];
 }) {
   const [displayName, setDisplayName] = useState(userName);
-  const [bio, setBio] = useState(member?.profile.bio ?? "");
-  const [city, setCity] = useState(member?.profile.city ?? "Konya");
-  const [district, setDistrict] = useState(member?.profile.district ?? "");
-  const [website, setWebsite] = useState(member?.profile.website ?? "");
-  const [locationNote, setLocationNote] = useState(
-    member?.profile.locationNote ?? "",
-  );
+  const [bio, setBio] = useState("");
+  const [city, setCity] = useState("Konya");
+  const [district, setDistrict] = useState("");
+  const [website, setWebsite] = useState("");
+  const [locationNote, setLocationNote] = useState("");
+
+  const memberKey = member
+    ? `${member.id}|${member.updatedAt ?? ""}|${member.displayName}|${member.profile.bio}|${member.profile.city}|${member.profile.district}|${member.profile.website}|${member.profile.locationNote}`
+    : "";
 
   useEffect(() => {
     setDisplayName(userName);
@@ -474,7 +499,8 @@ function ProfileTab({
       setWebsite(member.profile.website);
       setLocationNote(member.profile.locationNote);
     }
-  }, [userName, member]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userName, memberKey]);
 
   if (!isLocal || !member) {
     return (
@@ -501,13 +527,7 @@ function ProfileTab({
           e.preventDefault();
           const res = updateProfile({
             displayName,
-            profile: {
-              bio,
-              city,
-              district,
-              website,
-              locationNote,
-            },
+            profile: { bio, city, district, website, locationNote },
           });
           if (!res.ok) {
             toast.error(res.error);
@@ -583,14 +603,17 @@ function ProfileTab({
   );
 }
 
-function SecurityTab() {
-  const member = getSessionMember();
+function SecurityTab({ email }: { email: string }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newPassword2, setNewPassword2] = useState("");
   const [emailPass, setEmailPass] = useState("");
-  const [newEmail, setNewEmail] = useState(member?.email ?? "");
+  const [newEmail, setNewEmail] = useState(email);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    setNewEmail(email);
+  }, [email]);
 
   return (
     <div className="space-y-4">
@@ -712,8 +735,7 @@ function SecurityTab() {
 
       <PanelCard title="Oturum">
         <p className="mb-3 text-xs text-muted">
-          Bu cihazdaki oturumu sonlandırmak için çıkış yapın. Şifrenizi
-          unuttuysanız giriş sayfasından sıfırlayabilirsiniz.
+          Bu cihazdaki oturumu sonlandırmak için çıkış yapın.
         </p>
         <div className="flex flex-wrap gap-2">
           <Button
@@ -743,12 +765,25 @@ function ActivityTab({ displayName }: { displayName: string }) {
   const jobs = useJobsStore((s) => s.jobs);
   const reports = useReportsStore((s) => s.reports);
 
-  const myThreads = threads
-    .filter((t) => names[t.authorId] === displayName)
-    .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
-  const myListings = listings.filter((l) => l.authorName === displayName);
-  const myJobs = jobs.filter((j) => j.authorName === displayName);
-  const myReports = reports.filter((r) => r.reporterName === displayName);
+  const myThreads = useMemo(
+    () =>
+      threads
+        .filter((t) => names[t.authorId] === displayName)
+        .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)),
+    [threads, names, displayName],
+  );
+  const myListings = useMemo(
+    () => listings.filter((l) => l.authorName === displayName),
+    [listings, displayName],
+  );
+  const myJobs = useMemo(
+    () => jobs.filter((j) => j.authorName === displayName),
+    [jobs, displayName],
+  );
+  const myReports = useMemo(
+    () => reports.filter((r) => r.reporterName === displayName),
+    [reports, displayName],
+  );
 
   return (
     <div className="space-y-4">
@@ -807,7 +842,6 @@ function ActivityTab({ displayName }: { displayName: string }) {
                 >
                   {l.title}
                 </Link>
-                <span className="ml-2 text-[11px] text-subtle">{l.status}</span>
               </li>
             ))}
           </ul>
@@ -863,15 +897,26 @@ function PrefsTab({
   member: Member;
   updateProfile: ReturnType<typeof useMembersStore.getState>["updateProfile"];
 }) {
-  const [prefs, setPrefs] = useState(member.prefs);
+  const [showEmail, setShowEmail] = useState(member.prefs.showEmail);
+  const [notifyModeration, setNotifyModeration] = useState(
+    member.prefs.notifyModeration,
+  );
+  const [notifyListings, setNotifyListings] = useState(
+    member.prefs.notifyListings,
+  );
+  const [preferCompactLists, setPreferCompactLists] = useState(
+    member.prefs.preferCompactLists,
+  );
+
+  const prefsKey = `${member.id}|${member.prefs.showEmail}|${member.prefs.notifyModeration}|${member.prefs.notifyListings}|${member.prefs.preferCompactLists}`;
 
   useEffect(() => {
-    setPrefs(member.prefs);
-  }, [member.prefs]);
-
-  const toggle = (key: keyof typeof prefs) => {
-    setPrefs((p) => ({ ...p, [key]: !p[key] }));
-  };
+    setShowEmail(member.prefs.showEmail);
+    setNotifyModeration(member.prefs.notifyModeration);
+    setNotifyListings(member.prefs.notifyListings);
+    setPreferCompactLists(member.prefs.preferCompactLists);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefsKey]);
 
   return (
     <PanelCard
@@ -879,32 +924,38 @@ function PrefsTab({
       description="Gizlilik ve bildirim tercihleri bu cihazda saklanır."
     >
       <div className="space-y-3">
-        {(
-          [
-            ["showEmail", "E-posta adresimi profilde göster"],
-            ["notifyModeration", "Moderasyon sonucu hakkında bilgilendir"],
-            ["notifyListings", "İlan panosu hatırlatmaları"],
-            ["preferCompactLists", "Liste görünümünde kompakt satırlar"],
-          ] as const
-        ).map(([key, label]) => (
-          <label
-            key={key}
-            className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border bg-bg-elevated px-3 py-2.5 text-sm"
-          >
-            <span>{label}</span>
-            <input
-              type="checkbox"
-              checked={prefs[key]}
-              onChange={() => toggle(key)}
-              className="size-4 accent-[var(--color-primary,#0f6b52)]"
-            />
-          </label>
-        ))}
+        <ToggleRow
+          label="E-posta adresimi profilde göster"
+          checked={showEmail}
+          onChange={setShowEmail}
+        />
+        <ToggleRow
+          label="Moderasyon sonucu hakkında bilgilendir"
+          checked={notifyModeration}
+          onChange={setNotifyModeration}
+        />
+        <ToggleRow
+          label="İlan panosu hatırlatmaları"
+          checked={notifyListings}
+          onChange={setNotifyListings}
+        />
+        <ToggleRow
+          label="Liste görünümünde kompakt satırlar"
+          checked={preferCompactLists}
+          onChange={setPreferCompactLists}
+        />
         <div className="flex justify-end pt-2">
           <Button
             type="button"
             onClick={() => {
-              const res = updateProfile({ prefs });
+              const res = updateProfile({
+                prefs: {
+                  showEmail,
+                  notifyModeration,
+                  notifyListings,
+                  preferCompactLists,
+                },
+              });
               if (!res.ok) {
                 toast.error(res.error);
                 return;
@@ -917,6 +968,28 @@ function PrefsTab({
         </div>
       </div>
     </PanelCard>
+  );
+}
+
+function ToggleRow({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border bg-bg-elevated px-3 py-2.5 text-sm">
+      <span>{label}</span>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="size-4 accent-[var(--color-primary,#0f6b52)]"
+      />
+    </label>
   );
 }
 
