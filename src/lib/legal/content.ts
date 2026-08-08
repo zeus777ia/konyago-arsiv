@@ -1,0 +1,12 @@
+export const LEGAL = {
+  controller: {
+    title: "Veri Sorumlusu / Site İşletmecisi",
+    name: "KonyaGo Arşiv (konyagoarsiv.org)",
+    email: "info@konyago.com.tr",
+    related: "konyago.com.tr",
+  },
+  updatedAt: "8 Ağustos 2026",
+} as const;
+
+export const DISCLAIMER_SHORT =
+  "konyagoarsiv.org bağımsız bir topluluk platformudur; resmi bir kamu kurumu, belediye, valilik veya devlete bağlı web sitesi değildir.";

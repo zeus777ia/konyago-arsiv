@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SITE } from "@/lib/forum/data";
+import { DISCLAIMER_SHORT } from "@/lib/legal/content";
 import { cn } from "@/lib/utils";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { UserButton } from "@/lib/auth/gates";
@@ -117,28 +118,61 @@ export function ForumShell({
         </div>
       )}
 
+      <div className="border-b border-accent/20 bg-accent-soft">
+        <p className="mx-auto max-w-6xl px-3 py-2 text-[11px] leading-snug text-fg sm:px-4 sm:text-xs">
+          <strong className="font-semibold">Uyarı: </strong>
+          {DISCLAIMER_SHORT}{" "}
+          <Link
+            to="/yasal-uyari"
+            className="font-medium text-primary underline-offset-2 hover:underline"
+          >
+            Detay
+          </Link>
+        </p>
+      </div>
+
       <div className="mx-auto max-w-6xl px-3 py-4 sm:px-4 sm:py-6">{children}</div>
 
       <footer className="mt-4 border-t border-border bg-surface">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-3 py-5 text-xs text-muted sm:flex-row sm:items-center sm:justify-between sm:px-4">
-          <p>
-            © {new Date().getFullYear()} {SITE.name}
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-3 py-5 text-xs text-muted sm:px-4">
+          <p className="max-w-3xl leading-relaxed text-[11px] text-subtle">
+            {DISCLAIMER_SHORT}
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Link to="/ikinci-el" className="hover:text-primary">
-              İkinci el
-            </Link>
-            <Link to="/is-ilani" className="hover:text-primary">
-              İş panosu
-            </Link>
-            <a
-              href="https://konyago.com.tr"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-primary"
-            >
-              konyago.com.tr
-            </a>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              © {new Date().getFullYear()} {SITE.name} ·{" "}
+              <a
+                href="mailto:info@konyago.com.tr"
+                className="hover:text-primary"
+              >
+                info@konyago.com.tr
+              </a>
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link to="/yasal-uyari" className="hover:text-primary">
+                Yasal uyarı
+              </Link>
+              <Link to="/gizlilik" className="hover:text-primary">
+                Gizlilik
+              </Link>
+              <Link to="/kvkk" className="hover:text-primary">
+                KVKK
+              </Link>
+              <Link to="/ikinci-el" className="hover:text-primary">
+                İkinci el
+              </Link>
+              <Link to="/is-ilani" className="hover:text-primary">
+                İş panosu
+              </Link>
+              <a
+                href="https://konyago.com.tr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary"
+              >
+                konyago.com.tr
+              </a>
+            </div>
           </div>
         </div>
       </footer>

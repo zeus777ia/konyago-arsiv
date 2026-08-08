@@ -1,5 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import {
+  resetPasswordEmail,
+  sendAppEmail,
+  welcomeEmail,
+} from "@/lib/email/send";
 
 export type Member = {
   id: string;
@@ -15,18 +20,16 @@ export type MemberSession = {
   displayName: string;
 };
 
+export type ResetToken = {
+  email: string;
+  codeHash: string;
+  expiresAt: number;
+};
+
 type MembersState = {
   members: Member[];
   session: MemberSession | null;
-  register: (input: {
-    email: string;
-    password: string;
-    displayName: string;
-  }) => { ok: true } | { ok: false; error: string };
-  login: (input: {
-    email: string;
-    password: string;
-  }) => { ok: true } | { ok: false; error: string };
+  resetTokens: ResetToken[];
   logout: () => void;
   updateProfile: (displayName: string) => void;
 };
@@ -47,13 +50,16 @@ function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
+function randomCode() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
 export const useMembersStore = create<MembersState>()(
   persist(
     (set, get) => ({
       members: [],
       session: null,
-      register: () => ({ ok: false, error: "__ASYNC__" }),
-      login: () => ({ ok: false, error: "__ASYNC__" }),
+      resetTokens: [],
       logout: () => set({ session: null }),
       updateProfile: (displayName) => {
         const s = get().session;
@@ -68,8 +74,7 @@ export const useMembersStore = create<MembersState>()(
         });
       },
     }),
-    // v2: temiz başlangıç (demo hesapları sıfırla)
-    { name: "konyago-arsiv-members-v2" },
+    { name: "konyago-arsiv-members-v3" },
   ),
 );
 
@@ -109,6 +114,12 @@ export async function registerMember(input: {
       displayName: member.displayName,
     },
   });
+
+  // Hoş geldin e-postası (arka planda; hata kayıtı bozmaz)
+  void sendAppEmail(
+    welcomeEmail({ displayName: member.displayName, email: member.email }),
+  ).catch(() => undefined);
+
   return { ok: true };
 }
 
@@ -138,4 +149,91 @@ export async function loginMember(input: {
 
 export function logoutMember() {
   useMembersStore.getState().logout();
+}
+
+/**
+ * Şifre sıfırlama kodu üretir ve e-posta gönderir.
+ * Güvenlik: e-posta kayıtlı olmasa da aynı mesajı döner.
+ */
+export async function requestPasswordReset(
+  email: string,
+): Promise<{ ok: true; message: string } | { ok: false; error: string }> {
+  const em = normalizeEmail(email);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+    return { ok: false, error: "Geçerli bir e-posta girin" };
+  }
+
+  const member = useMembersStore.getState().members.find((m) => m.email === em);
+  const generic =
+    "Kayıtlıysa e-postana 6 haneli kod gönderildi. Gelen kutunu ve spam klasörünü kontrol et.";
+
+  if (!member) {
+    // Enumerasyonu engelle
+    return { ok: true, message: generic };
+  }
+
+  const code = randomCode();
+  const codeHash = await hashPassword(code, `reset:${em}`);
+  const expiresAt = Date.now() + 30 * 60 * 1000;
+
+  const others = useMembersStore
+    .getState()
+    .resetTokens.filter((t) => t.email !== em && t.expiresAt > Date.now());
+
+  useMembersStore.setState({
+    resetTokens: [...others, { email: em, codeHash, expiresAt }],
+  });
+
+  const mail = await sendAppEmail(
+    resetPasswordEmail({
+      displayName: member.displayName,
+      email: em,
+      code,
+    }),
+  );
+
+  if (!mail.ok) {
+    return {
+      ok: false,
+      error: `E-posta gönderilemedi: ${mail.error}. Lütfen daha sonra tekrar dene veya ${"info@konyago.com.tr"} adresine yaz.`,
+    };
+  }
+
+  return { ok: true, message: generic };
+}
+
+export async function resetPasswordWithCode(input: {
+  email: string;
+  code: string;
+  newPassword: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const em = normalizeEmail(input.email);
+  if (input.newPassword.length < 6) {
+    return { ok: false, error: "Yeni şifre en az 6 karakter olmalı" };
+  }
+  const token = useMembersStore
+    .getState()
+    .resetTokens.find((t) => t.email === em && t.expiresAt > Date.now());
+  if (!token) {
+    return { ok: false, error: "Kod geçersiz veya süresi dolmuş" };
+  }
+  const codeHash = await hashPassword(input.code.trim(), `reset:${em}`);
+  if (codeHash !== token.codeHash) {
+    return { ok: false, error: "Kod hatalı" };
+  }
+  const member = useMembersStore.getState().members.find((m) => m.email === em);
+  if (!member) {
+    return { ok: false, error: "Hesap bulunamadı" };
+  }
+  const passwordHash = await hashPassword(input.newPassword, member.id);
+  useMembersStore.setState({
+    members: useMembersStore
+      .getState()
+      .members.map((m) => (m.id === member.id ? { ...m, passwordHash } : m)),
+    resetTokens: useMembersStore
+      .getState()
+      .resetTokens.filter((t) => t.email !== em),
+    session: null,
+  });
+  return { ok: true };
 }

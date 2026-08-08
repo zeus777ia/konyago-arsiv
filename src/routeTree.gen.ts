@@ -10,7 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GizlilikRouteImport } from './routes/gizlilik'
+import { Route as KvkkRouteImport } from './routes/kvkk'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as YasalUyariRouteImport } from './routes/yasal-uyari'
 import { Route as YeniKonuRouteImport } from './routes/yeni-konu'
 import { Route as YeniMesajlarRouteImport } from './routes/yeni-mesajlar'
 import { Route as IkinciElIndexRouteImport } from './routes/ikinci-el/index'
@@ -28,9 +31,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GizlilikRoute = GizlilikRouteImport.update({
+  id: '/gizlilik',
+  path: '/gizlilik',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KvkkRoute = KvkkRouteImport.update({
+  id: '/kvkk',
+  path: '/kvkk',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const YasalUyariRoute = YasalUyariRouteImport.update({
+  id: '/yasal-uyari',
+  path: '/yasal-uyari',
   getParentRoute: () => rootRouteImport,
 } as any)
 const YeniKonuRoute = YeniKonuRouteImport.update({
@@ -91,7 +109,10 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/gizlilik': typeof GizlilikRoute
+  '/kvkk': typeof KvkkRoute
   '/login': typeof LoginRoute
+  '/yasal-uyari': typeof YasalUyariRoute
   '/yeni-konu': typeof YeniKonuRoute
   '/yeni-mesajlar': typeof YeniMesajlarRoute
   '/ikinci-el/$listingId': typeof IkinciElListingIdRoute
@@ -106,7 +127,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/gizlilik': typeof GizlilikRoute
+  '/kvkk': typeof KvkkRoute
   '/login': typeof LoginRoute
+  '/yasal-uyari': typeof YasalUyariRoute
   '/yeni-konu': typeof YeniKonuRoute
   '/yeni-mesajlar': typeof YeniMesajlarRoute
   '/ikinci-el/$listingId': typeof IkinciElListingIdRoute
@@ -122,7 +146,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/gizlilik': typeof GizlilikRoute
+  '/kvkk': typeof KvkkRoute
   '/login': typeof LoginRoute
+  '/yasal-uyari': typeof YasalUyariRoute
   '/yeni-konu': typeof YeniKonuRoute
   '/yeni-mesajlar': typeof YeniMesajlarRoute
   '/ikinci-el/$listingId': typeof IkinciElListingIdRoute
@@ -139,7 +166,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/gizlilik'
+    | '/kvkk'
     | '/login'
+    | '/yasal-uyari'
     | '/yeni-konu'
     | '/yeni-mesajlar'
     | '/ikinci-el/$listingId'
@@ -154,7 +184,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/gizlilik'
+    | '/kvkk'
     | '/login'
+    | '/yasal-uyari'
     | '/yeni-konu'
     | '/yeni-mesajlar'
     | '/ikinci-el/$listingId'
@@ -169,7 +202,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/gizlilik'
+    | '/kvkk'
     | '/login'
+    | '/yasal-uyari'
     | '/yeni-konu'
     | '/yeni-mesajlar'
     | '/ikinci-el/$listingId'
@@ -185,7 +221,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GizlilikRoute: typeof GizlilikRoute
+  KvkkRoute: typeof KvkkRoute
   LoginRoute: typeof LoginRoute
+  YasalUyariRoute: typeof YasalUyariRoute
   YeniKonuRoute: typeof YeniKonuRoute
   YeniMesajlarRoute: typeof YeniMesajlarRoute
   IkinciElListingIdRoute: typeof IkinciElListingIdRoute
@@ -208,11 +247,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gizlilik': {
+      id: '/gizlilik'
+      path: '/gizlilik'
+      fullPath: '/gizlilik'
+      preLoaderRoute: typeof GizlilikRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kvkk': {
+      id: '/kvkk'
+      path: '/kvkk'
+      fullPath: '/kvkk'
+      preLoaderRoute: typeof KvkkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/yasal-uyari': {
+      id: '/yasal-uyari'
+      path: '/yasal-uyari'
+      fullPath: '/yasal-uyari'
+      preLoaderRoute: typeof YasalUyariRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/yeni-konu': {
@@ -297,7 +357,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GizlilikRoute: GizlilikRoute,
+  KvkkRoute: KvkkRoute,
   LoginRoute: LoginRoute,
+  YasalUyariRoute: YasalUyariRoute,
   YeniKonuRoute: YeniKonuRoute,
   YeniMesajlarRoute: YeniMesajlarRoute,
   IkinciElListingIdRoute: IkinciElListingIdRoute,
