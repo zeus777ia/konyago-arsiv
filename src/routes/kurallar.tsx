@@ -1,8 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { LegalLayout, Section } from "@/components/legal/legal-layout";
 import { RULES_UPDATED, RULE_SECTIONS } from "@/lib/forum/rules-content";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/kurallar")({
+  head: () =>
+    seoHead({
+      title: 'Kurallar',
+      description: 'KonyaGo Arşiv platform kullanım kuralları, moderasyon ve spam politikası.',
+      path: '/kurallar',
+    }),
   component: RulesPage,
 });
 

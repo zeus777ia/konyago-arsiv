@@ -12,8 +12,15 @@ import { isFounder } from "@/lib/staff/founder";
 import { formatRelative } from "@/lib/utils";
 import { useReportsStore } from "@/lib/reports/store";
 import { SAFETY } from "@/lib/safety/content";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/moderasyon")({
+  head: () =>
+    seoHead({
+      title: 'Moderasyon',
+      description: 'Moderasyon paneli.',
+      path: '/moderasyon', noIndex: true,
+    }),
   component: ModerationPage,
 });
 

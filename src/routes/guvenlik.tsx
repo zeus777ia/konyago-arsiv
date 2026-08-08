@@ -3,8 +3,15 @@ import { ShieldCheck } from "lucide-react";
 import { ForumShell } from "@/components/forum/layout";
 import { SPAM_PUBLIC_EXPLAIN } from "@/lib/forum/spam";
 import { SAFETY } from "@/lib/safety/content";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/guvenlik")({
+  head: () =>
+    seoHead({
+      title: 'Güvenlik merkezi',
+      description: 'Güvenli buluşma, dolandırıcılık uyarısı ve kullanıcı koruma rehberi.',
+      path: '/guvenlik',
+    }),
   component: SafetyPage,
 });
 

@@ -1,0 +1,17 @@
+# KonyaGo Arşiv
+> Konya odaklı bağımsız topluluk forumu: semt sohbeti, ikinci el ilan panosu ve iş panosu.
+
+- Site: https://konyagoarsiv.org
+- Rehber: https://konyago.com.tr
+- İletişim: info@konyago.com.tr
+- Dil: Türkçe
+- Resmî kamu kurumu sitesi değildir.
+
+## Ana bölümler
+- / Forum ana sayfa
+- /ikinci-el İkinci el ilan panosu (sitede ödeme yok)
+- /is-ilani İş panosu
+- /kurallar Platform kuralları
+- /guvenlik Güvenlik merkezi
+- /sss Sık sorulan sorular
+- /login Üye girişi ve kayıt

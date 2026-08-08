@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalLayout, Section } from "@/components/legal/legal-layout";
 import { LEGAL } from "@/lib/legal/content";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/kvkk")({
+  head: () =>
+    seoHead({
+      title: 'KVKK',
+      description: 'Kişisel verilerin korunması ve aydınlatma metni.',
+      path: '/kvkk',
+    }),
   component: KvkkPage,
 });
 

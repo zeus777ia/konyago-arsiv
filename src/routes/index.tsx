@@ -11,8 +11,16 @@ import {
   CategoryList,
   LatestThreadsTable,
 } from "@/components/forum/category-list";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
+  head: () =>
+    seoHead({
+      title: "Ana sayfa",
+      description:
+        "Konya forum ana sayfa: kategoriler, duyurular, sıcak konular. KonyaGo Arşiv topluluğu.",
+      path: "/",
+    }),
   component: HomePage,
 });
 
@@ -31,9 +39,7 @@ function HomePage() {
           <CategoryList filter={search} hideOfficialGroup />
           <LatestThreadsTable filter={search} />
         </div>
-        <div className="min-w-0">
-          <ForumSidebar />
-        </div>
+        <ForumSidebar />
       </div>
     </ForumShell>
   );

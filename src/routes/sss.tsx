@@ -1,7 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ForumShell } from "@/components/forum/layout";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/sss")({
+  head: () =>
+    seoHead({
+      title: 'SSS',
+      description: 'Sık sorulan sorular: üyelik, ilanlar, moderasyon ve gizlilik.',
+      path: '/sss',
+    }),
   component: FaqPage,
 });
 

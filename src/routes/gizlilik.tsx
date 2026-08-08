@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalLayout, Section } from "@/components/legal/legal-layout";
 import { LEGAL } from "@/lib/legal/content";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/gizlilik")({
+  head: () =>
+    seoHead({
+      title: 'Gizlilik',
+      description: 'Gizlilik politikası ve çerez bilgilendirmesi.',
+      path: '/gizlilik',
+    }),
   component: PrivacyPage,
 });
 

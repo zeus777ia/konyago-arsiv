@@ -12,8 +12,18 @@ import {
 } from "@/lib/members/store";
 import { GROK_PROVIDERS, authEnabled, signIn } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
+import { seoHead } from "@/lib/seo";
 
-export const Route = createFileRoute("/login")({ component: Login });
+export const Route = createFileRoute("/login")({
+  head: () =>
+    seoHead({
+      title: "Giriş ve kayıt",
+      description:
+        "KonyaGo Arşiv üye girişi ve kayıt. Ücretsiz hesap oluşturun.",
+      path: "/login",
+    }),
+  component: Login,
+});
 
 type Tab = "giris" | "kayit" | "sifre";
 

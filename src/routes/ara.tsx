@@ -8,12 +8,19 @@ import { useForumStore } from "@/lib/forum/store";
 import { useMarketplaceStore } from "@/lib/marketplace/store";
 import { useJobsStore } from "@/lib/jobs/store";
 import { formatRelative } from "@/lib/utils";
+import { seoHead } from "@/lib/seo";
 
 const searchSchema = z.object({
   q: z.string().optional(),
 });
 
 export const Route = createFileRoute("/ara")({
+  head: () =>
+    seoHead({
+      title: 'Arama',
+      description: 'Forum, ikinci el ve iş panosunda arama.',
+      path: '/ara',
+    }),
   validateSearch: searchSchema,
   component: SearchPage,
 });

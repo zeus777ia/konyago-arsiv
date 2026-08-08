@@ -1,0 +1,14 @@
+# KonyaGo Arşiv — https://konyagoarsiv.org
+User-agent: *
+Allow: /
+
+# Özel / oturum sayfaları
+Disallow: /hesabim
+Disallow: /moderasyon
+Disallow: /yeni-konu
+Disallow: /api/
+
+Sitemap: https://konyagoarsiv.org/sitemap.xml
+
+# Ana site (rehber)
+# https://konyago.com.tr

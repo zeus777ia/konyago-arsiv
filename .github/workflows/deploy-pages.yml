@@ -1,42 +1,34 @@
+# DISABLED: Pages, branch `main` kökünden yayınlanıyor (Settings → Pages → Deploy from a branch).
+# Bu workflow her push'ta `npm ci` ile yeniden build etmeye çalışıyordu; package-lock
+# senkronu bozulunca sürekli kırmızıya düşüyordu. Ayrıca GitHub'ın kendi
+# `pages-build-deployment` akışı zaten statik dosyaları yayınlıyor.
+#
+# Canlı deploy akışı: yerelde `npm run build:pages` → pages-dist içeriğini
+# repo köküne kopyala → push main. Çift deploy ve Actions şişkinliği yok.
+#
+# İleride Actions ile build istersen: lock dosyasını senkron tut, Pages source'u
+# "GitHub Actions" yap ve bu dosyayı yeniden etkinleştir.
+
 name: Deploy site to GitHub Pages
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      reason:
+        description: "Neden (manuel; varsayılan kapalı)"
+        required: false
+        default: "manual-only"
 
+# push tetikleyicisi YOK — otomatik kırmızı koşular oluşmaz
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
-  build:
+  skip:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-      - name: Install
-        run: npm ci
-      - name: Build pages
-        run: npm run build:pages
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: pages-dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy workflow intentionally disabled
+        run: |
+          echo "Bu workflow bilinçli olarak devre dışı."
+          echo "GitHub Pages: branch main / kök dizin."
+          echo "Otomatik build-deploy yerine pages-build-deployment kullanılır."

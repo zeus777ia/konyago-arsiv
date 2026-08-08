@@ -1,8 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { LegalLayout, Section } from "@/components/legal/legal-layout";
 import { LEGAL } from "@/lib/legal/content";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/yasal-uyari")({
+  head: () =>
+    seoHead({
+      title: 'Yasal uyarı',
+      description: 'Yasal uyarı: bağımsız topluluk platformu, resmî kurum sitesi değildir.',
+      path: '/yasal-uyari',
+    }),
   component: DisclaimerPage,
 });
 

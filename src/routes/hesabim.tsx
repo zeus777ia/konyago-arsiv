@@ -58,6 +58,7 @@ import { useJobsStore } from "@/lib/jobs/store";
 import { useReportsStore } from "@/lib/reports/store";
 import { cn, formatRelative } from "@/lib/utils";
 import { authEnabled, signOut } from "@/lib/auth/client";
+import { seoHead } from "@/lib/seo";
 
 const searchSchema = z.object({
   sekme: z
@@ -66,6 +67,12 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/hesabim")({
+  head: () =>
+    seoHead({
+      title: 'Hesabım',
+      description: 'Kullanıcı paneli ve hesap yönetimi.',
+      path: '/hesabim', noIndex: true,
+    }),
   validateSearch: searchSchema,
   component: AccountPanelPage,
 });

@@ -11,8 +11,15 @@ import {
 } from "@/lib/marketplace/data";
 import { useMarketplaceStore } from "@/lib/marketplace/store";
 import { cn, formatRelative } from "@/lib/utils";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/ikinci-el/")({
+  head: () =>
+    seoHead({
+      title: 'İkinci el panosu',
+      description: 'Konya ikinci el ilan panosu. Sitede ödeme yok; alıcı ve satıcı site dışında anlaşır.',
+      path: '/ikinci-el',
+    }),
   component: MarketPage,
 });
 

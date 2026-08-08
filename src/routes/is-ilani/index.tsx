@@ -10,8 +10,15 @@ import {
 } from "@/lib/jobs/data";
 import { useJobsStore } from "@/lib/jobs/store";
 import { cn, formatRelative } from "@/lib/utils";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/is-ilani/")({
+  head: () =>
+    seoHead({
+      title: 'İş panosu',
+      description: 'Konya iş ilanları: iş veren ve iş arayan panosu.',
+      path: '/is-ilani',
+    }),
   component: JobsPage,
 });
 

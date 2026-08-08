@@ -3,8 +3,15 @@ import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { ForumShell } from "@/components/forum/layout";
 import { LatestThreadsTable } from "@/components/forum/category-list";
+import { seoHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/yeni-mesajlar")({
+  head: () =>
+    seoHead({
+      title: 'Yeni mesajlar',
+      description: 'Forumda en son mesajlar ve güncel konular.',
+      path: '/yeni-mesajlar',
+    }),
   component: NewMessagesPage,
 });
 

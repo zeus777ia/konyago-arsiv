@@ -1,12 +1,17 @@
 {
   "name": "KonyaGo Arşiv",
-  "short_name": "KonyaGo",
-  "description": "Forum, ikinci el ve iş panosu — konyagoarsiv.org",
+  "short_name": "KonyaGo Arşiv",
+  "description": "Konya forum, ikinci el ilan ve iş panosu — konyagoarsiv.org. Bağımsız topluluk platformu.",
   "start_url": "/",
+  "scope": "/",
+  "id": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#f0ebe3",
-  "theme_color": "#1a2e28",
+  "theme_color": "#1a3a32",
   "lang": "tr",
+  "dir": "ltr",
+  "categories": ["social", "lifestyle", "business"],
   "icons": [
     {
       "src": "/favicon.svg",
