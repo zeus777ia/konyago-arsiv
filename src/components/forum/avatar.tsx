@@ -1,4 +1,5 @@
 import { cn, initials } from "@/lib/utils";
+import { isFounderName } from "@/lib/staff/founder";
 
 const COLORS = [
   "bg-primary/15 text-primary",
@@ -18,6 +19,7 @@ export function Avatar({
   size?: "sm" | "md" | "lg";
   className?: string;
 }) {
+  const founder = isFounderName(name);
   const color = COLORS[name.charCodeAt(0) % COLORS.length];
   return (
     <span
@@ -26,12 +28,12 @@ export function Avatar({
         size === "sm" && "size-7 text-[10px]",
         size === "md" && "size-9 text-xs",
         size === "lg" && "size-12 text-sm",
-        color,
+        founder ? "founder-avatar" : color,
         className,
       )}
       aria-hidden
     >
-      {initials(name)}
+      {founder ? "★" : initials(name)}
     </span>
   );
 }

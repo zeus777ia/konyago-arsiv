@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { categoryGroups, getCategory } from "@/lib/forum/data";
 import { displayName } from "@/lib/forum/names";
 import { CategoryIcon } from "@/components/forum/icons";
+import { UserName } from "@/components/forum/user-name";
 import { formatCount, formatRelative } from "@/lib/utils";
 import { useForumStore } from "@/lib/forum/store";
 
@@ -71,11 +72,6 @@ export function CategoryList({ filter = "" }: { filter?: string }) {
                       <p className="mt-0.5 text-xs leading-snug text-muted">
                         {cat.description}
                       </p>
-                      {last && (
-                        <p className="mt-1.5 truncate text-[11px] text-subtle sm:hidden">
-                          Son: {last.title} · {formatRelative(last.lastPostAt)}
-                        </p>
-                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-4 pl-[52px] sm:pl-0">
@@ -105,9 +101,13 @@ export function CategoryList({ filter = "" }: { filter?: string }) {
                           >
                             {last.title}
                           </Link>
-                          <p className="mt-0.5 text-[11px] text-subtle">
-                            {formatRelative(last.lastPostAt)} ·{" "}
-                            {displayName(last.lastPosterId, names)}
+                          <p className="mt-0.5 flex items-center justify-end gap-1 text-[11px] text-subtle">
+                            <span>{formatRelative(last.lastPostAt)} ·</span>
+                            <UserName
+                              name={displayName(last.lastPosterId, names)}
+                              size="sm"
+                              showBadge={false}
+                            />
                           </p>
                         </>
                       ) : (
@@ -213,9 +213,12 @@ export function LatestThreadsTable({
                             >
                               {t.title}
                             </Link>
-                            <p className="text-[11px] text-subtle">
-                              {displayName(t.authorId, names)} ·{" "}
-                              {formatRelative(t.createdAt)}
+                            <p className="mt-0.5 flex flex-wrap items-center gap-1 text-[11px] text-subtle">
+                              <UserName
+                                name={displayName(t.authorId, names)}
+                                size="sm"
+                              />
+                              <span>· {formatRelative(t.createdAt)}</span>
                             </p>
                           </div>
                         </div>
@@ -240,8 +243,11 @@ export function LatestThreadsTable({
                         {formatCount(t.views)}
                       </td>
                       <td className="px-4 py-2.5 text-right">
-                        <div className="text-xs font-medium text-fg">
-                          {displayName(t.lastPosterId, names)}
+                        <div className="flex justify-end">
+                          <UserName
+                            name={displayName(t.lastPosterId, names)}
+                            size="sm"
+                          />
                         </div>
                         <div className="text-[11px] text-subtle">
                           {formatRelative(t.lastPostAt)}

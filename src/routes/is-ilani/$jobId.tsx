@@ -1,11 +1,19 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ChevronRight, MapPin, ShieldAlert } from "lucide-react";
+import {
+  createFileRoute,
+  Link,
+  notFound,
+  useNavigate,
+} from "@tanstack/react-router";
+import { ChevronRight, MapPin, ShieldAlert, Trash2 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { ForumShell } from "@/components/forum/layout";
+import { UserName } from "@/components/forum/user-name";
 import { Button } from "@/components/ui/button";
 import { JOBS_NOTICE, JOB_KINDS } from "@/lib/jobs/data";
 import { useJobsStore } from "@/lib/jobs/store";
 import { formatRelative } from "@/lib/utils";
+import { useCurrentUser } from "@/lib/auth/use-current-user";
+import { isFounder } from "@/lib/staff/founder";
 
 export const Route = createFileRoute("/is-ilani/$jobId")({
   component: JobDetailPage,
@@ -13,8 +21,12 @@ export const Route = createFileRoute("/is-ilani/$jobId")({
 
 function JobDetailPage() {
   const { jobId } = Route.useParams();
+  const navigate = useNavigate();
   const job = useJobsStore((s) => s.jobs.find((j) => j.id === jobId));
   const closeJob = useJobsStore((s) => s.closeJob);
+  const removeJob = useJobsStore((s) => s.removeJob);
+  const user = useCurrentUser();
+  const founder = isFounder(user);
 
   if (!job) throw notFound();
 
@@ -59,9 +71,10 @@ function JobDetailPage() {
           </div>
           <h1 className="text-xl font-semibold tracking-tight">{job.title}</h1>
           <p className="mt-1 text-sm text-muted">{job.companyOrPerson}</p>
-          <p className="mt-2 flex items-center gap-1 text-xs text-subtle">
+          <p className="mt-2 flex flex-wrap items-center gap-1 text-xs text-subtle">
             <MapPin className="size-3.5" />
-            {job.district} · {formatRelative(job.createdAt)} · {job.authorName}
+            {job.district} · {formatRelative(job.createdAt)} ·{" "}
+            <UserName name={job.authorName} size="sm" />
           </p>
           <p className="mt-4 text-sm leading-relaxed whitespace-pre-wrap text-fg">
             {job.description}
@@ -76,8 +89,8 @@ function JobDetailPage() {
               <dd className="text-sm font-semibold break-all">{job.contact}</dd>
             </div>
           </dl>
-          {job.status === "aktif" && (
-            <div className="mt-4">
+          <div className="mt-4 flex flex-wrap gap-2">
+            {job.status === "aktif" && (
               <Button
                 type="button"
                 variant="secondary"
@@ -89,8 +102,25 @@ function JobDetailPage() {
               >
                 İlanı kapat
               </Button>
-            </div>
-          )}
+            )}
+            {founder && (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="text-danger"
+                onClick={() => {
+                  if (!confirm("İlan kalıcı silinsin mi?")) return;
+                  removeJob(job.id);
+                  toast.success("İlan silindi");
+                  void navigate({ to: "/is-ilani" });
+                }}
+              >
+                <Trash2 className="size-3.5" />
+                Kurucu: sil
+              </Button>
+            )}
+          </div>
         </div>
         <div className="flex gap-2 rounded-lg border border-primary/20 bg-primary-soft px-3 py-2.5 text-xs leading-relaxed">
           <ShieldAlert className="mt-0.5 size-4 shrink-0 text-primary" />

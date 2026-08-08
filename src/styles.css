@@ -77,3 +77,75 @@
     scrollbar-color: var(--color-border-strong) transparent;
   }
 }
+
+/* —— Kurucu neon isim —— */
+@keyframes founder-neon-pulse {
+  0%,
+  100% {
+    color: #39ffb0;
+    text-shadow:
+      0 0 4px #39ffb0,
+      0 0 10px #0ff,
+      0 0 18px #00e5ff,
+      0 0 28px #0f6b52;
+    opacity: 1;
+  }
+  40% {
+    color: #7dffe0;
+    text-shadow:
+      0 0 2px #7dffe0,
+      0 0 6px #5ef,
+      0 0 12px #0af;
+    opacity: 0.75;
+  }
+  55% {
+    color: #e0fff7;
+    text-shadow:
+      0 0 8px #fff,
+      0 0 16px #39ffb0,
+      0 0 32px #00f0ff,
+      0 0 48px #0f6b52;
+    opacity: 1;
+  }
+  70% {
+    color: #00ffc8;
+    text-shadow:
+      0 0 3px #00ffc8,
+      0 0 8px #0ff;
+    opacity: 0.55;
+  }
+}
+
+@keyframes founder-badge-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 4px rgb(57 255 176 / 0.7),
+      0 0 10px rgb(0 229 255 / 0.45);
+  }
+  50% {
+    box-shadow:
+      0 0 8px rgb(57 255 176 / 0.95),
+      0 0 18px rgb(0 229 255 / 0.7);
+  }
+}
+
+.founder-neon {
+  animation: founder-neon-pulse 1.6s ease-in-out infinite;
+  letter-spacing: 0.02em;
+}
+
+.founder-badge {
+  background: linear-gradient(135deg, #0b3d32 0%, #0f6b52 45%, #0a8f6e 100%);
+  color: #e6fff7;
+  border: 1px solid rgb(57 255 176 / 0.55);
+  animation: founder-badge-glow 1.8s ease-in-out infinite;
+}
+
+.founder-avatar {
+  background: linear-gradient(145deg, #0b3d32, #14b8a6) !important;
+  color: #ecfdf5 !important;
+  box-shadow:
+    0 0 0 2px rgb(57 255 176 / 0.55),
+    0 0 12px rgb(0 229 255 / 0.45);
+}

@@ -16,6 +16,7 @@ type JobsState = {
     authorName: string;
   }) => string;
   closeJob: (id: string) => void;
+  removeJob: (id: string) => void;
 };
 
 function id() {
@@ -51,6 +52,9 @@ export const useJobsStore = create<JobsState>()(
             j.id === jobId ? { ...j, status: "kapandi" } : j,
           ),
         });
+      },
+      removeJob: (jobId) => {
+        set({ jobs: get().jobs.filter((j) => j.id !== jobId) });
       },
     }),
     { name: "konyago-arsiv-jobs-v2" },

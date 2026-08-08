@@ -19,6 +19,7 @@ type MarketState = {
     authorName: string;
   }) => string;
   markSold: (id: string) => void;
+  removeListing: (id: string) => void;
 };
 
 function id() {
@@ -52,6 +53,11 @@ export const useMarketplaceStore = create<MarketState>()(
           listings: get().listings.map((l) =>
             l.id === listingId ? { ...l, status: "satildi" } : l,
           ),
+        });
+      },
+      removeListing: (listingId) => {
+        set({
+          listings: get().listings.filter((l) => l.id !== listingId),
         });
       },
     }),

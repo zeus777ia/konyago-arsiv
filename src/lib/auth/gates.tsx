@@ -1,8 +1,11 @@
 import type { ReactNode } from "react";
 import { Navigate } from "@tanstack/react-router";
+import { Crown } from "lucide-react";
 import { authEnabled, signOut } from "./client";
 import { useCurrentUser, useCurrentUserState } from "./use-current-user";
 import { logoutMember } from "@/lib/members/store";
+import { FOUNDER_TITLE, isFounder } from "@/lib/staff/founder";
+import { UserName } from "@/components/forum/user-name";
 
 export const SIGN_IN_PATH = "/login";
 
@@ -25,6 +28,7 @@ export function UserButton() {
   const user = useCurrentUser();
   if (!user) return null;
   const label = user.displayName ?? user.primaryEmail ?? "Üye";
+  const founder = isFounder(user);
 
   const onSignOut = () => {
     if (user.isLocalMember) {
@@ -43,13 +47,25 @@ export function UserButton() {
           className="h-8 w-8 rounded-full object-cover"
         />
       ) : (
-        <span className="grid h-8 w-8 place-items-center rounded-full bg-white/15 text-xs font-semibold text-header-fg">
-          {label.charAt(0).toUpperCase()}
+        <span
+          className={
+            founder
+              ? "founder-avatar grid h-8 w-8 place-items-center rounded-full text-xs font-semibold"
+              : "grid h-8 w-8 place-items-center rounded-full bg-white/15 text-xs font-semibold text-header-fg"
+          }
+        >
+          {founder ? "★" : label.charAt(0).toUpperCase()}
         </span>
       )}
-      <span className="hidden max-w-[7rem] truncate text-sm font-medium text-header-fg sm:inline">
-        {label}
-      </span>
+      <div className="hidden min-w-0 flex-col sm:flex">
+        <UserName name={label} size="sm" className="max-w-[9rem] truncate" />
+        {founder && (
+          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold tracking-wider text-emerald-300 uppercase">
+            <Crown className="size-2.5" />
+            {FOUNDER_TITLE}
+          </span>
+        )}
+      </div>
       <button
         type="button"
         onClick={onSignOut}

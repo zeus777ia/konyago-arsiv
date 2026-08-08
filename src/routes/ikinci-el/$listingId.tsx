@@ -1,7 +1,13 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ChevronRight, MapPin, ShieldAlert } from "lucide-react";
+import {
+  createFileRoute,
+  Link,
+  notFound,
+  useNavigate,
+} from "@tanstack/react-router";
+import { ChevronRight, MapPin, ShieldAlert, Trash2 } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { ForumShell } from "@/components/forum/layout";
+import { UserName } from "@/components/forum/user-name";
 import { Button } from "@/components/ui/button";
 import {
   CONDITIONS,
@@ -10,6 +16,8 @@ import {
 } from "@/lib/marketplace/data";
 import { useMarketplaceStore } from "@/lib/marketplace/store";
 import { formatRelative } from "@/lib/utils";
+import { useCurrentUser } from "@/lib/auth/use-current-user";
+import { isFounder } from "@/lib/staff/founder";
 
 export const Route = createFileRoute("/ikinci-el/$listingId")({
   component: ListingDetailPage,
@@ -17,10 +25,14 @@ export const Route = createFileRoute("/ikinci-el/$listingId")({
 
 function ListingDetailPage() {
   const { listingId } = Route.useParams();
+  const navigate = useNavigate();
   const listing = useMarketplaceStore((s) =>
     s.listings.find((l) => l.id === listingId),
   );
   const markSold = useMarketplaceStore((s) => s.markSold);
+  const removeListing = useMarketplaceStore((s) => s.removeListing);
+  const user = useCurrentUser();
+  const founder = isFounder(user);
 
   if (!listing) throw notFound();
 
@@ -62,10 +74,10 @@ function ListingDetailPage() {
             )}
           </div>
           <h1 className="text-xl font-semibold tracking-tight">{listing.title}</h1>
-          <p className="mt-2 flex items-center gap-1 text-xs text-subtle">
+          <p className="mt-2 flex flex-wrap items-center gap-1 text-xs text-subtle">
             <MapPin className="size-3.5" />
             {listing.district} · {formatRelative(listing.createdAt)} ·{" "}
-            {listing.authorName}
+            <UserName name={listing.authorName} size="sm" />
           </p>
           <p className="mt-4 text-sm leading-relaxed whitespace-pre-wrap text-fg">
             {listing.description}
@@ -80,8 +92,8 @@ function ListingDetailPage() {
               <dd className="text-sm font-semibold break-all">{listing.contact}</dd>
             </div>
           </dl>
-          {listing.status === "aktif" && (
-            <div className="mt-4">
+          <div className="mt-4 flex flex-wrap gap-2">
+            {listing.status === "aktif" && (
               <Button
                 type="button"
                 variant="secondary"
@@ -93,8 +105,25 @@ function ListingDetailPage() {
               >
                 Satıldı işaretle
               </Button>
-            </div>
-          )}
+            )}
+            {founder && (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="text-danger"
+                onClick={() => {
+                  if (!confirm("İlan kalıcı silinsin mi?")) return;
+                  removeListing(listing.id);
+                  toast.success("İlan silindi");
+                  void navigate({ to: "/ikinci-el" });
+                }}
+              >
+                <Trash2 className="size-3.5" />
+                Kurucu: sil
+              </Button>
+            )}
+          </div>
         </div>
         <div className="flex gap-2 rounded-lg border border-accent/25 bg-accent-soft px-3 py-2.5 text-xs leading-relaxed">
           <ShieldAlert className="mt-0.5 size-4 shrink-0 text-accent" />

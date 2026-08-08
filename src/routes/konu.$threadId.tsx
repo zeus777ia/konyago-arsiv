@@ -1,15 +1,30 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ChevronRight, Send } from "lucide-react";
+import {
+  createFileRoute,
+  Link,
+  notFound,
+  useNavigate,
+} from "@tanstack/react-router";
+import {
+  ChevronRight,
+  Flame,
+  Lock,
+  Pin,
+  Send,
+  Trash2,
+  Unlock,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { ForumShell } from "@/components/forum/layout";
 import { Avatar } from "@/components/forum/avatar";
+import { UserName } from "@/components/forum/user-name";
 import { Button } from "@/components/ui/button";
 import { getCategory, getUser } from "@/lib/forum/data";
 import { displayName } from "@/lib/forum/names";
 import { useForumStore } from "@/lib/forum/store";
 import { formatRelative } from "@/lib/utils";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
+import { isFounder } from "@/lib/staff/founder";
 
 export const Route = createFileRoute("/konu/$threadId")({
   component: ThreadPage,
@@ -17,11 +32,18 @@ export const Route = createFileRoute("/konu/$threadId")({
 
 function ThreadPage() {
   const { threadId } = Route.useParams();
+  const navigate = useNavigate();
   const threads = useForumStore((s) => s.threads);
   const posts = useForumStore((s) => s.posts);
   const names = useForumStore((s) => s.names);
   const addReply = useForumStore((s) => s.addReply);
+  const deleteThread = useForumStore((s) => s.deleteThread);
+  const deletePost = useForumStore((s) => s.deletePost);
+  const togglePin = useForumStore((s) => s.togglePin);
+  const toggleLock = useForumStore((s) => s.toggleLock);
+  const toggleHot = useForumStore((s) => s.toggleHot);
   const user = useCurrentUser();
+  const founder = isFounder(user);
   const [body, setBody] = useState("");
 
   const thread = threads.find((t) => t.id === threadId);
@@ -40,6 +62,10 @@ function ThreadPage() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (thread.locked && !founder) {
+      toast.error("Bu konu kilitli");
+      return;
+    }
     if (!body.trim()) {
       toast.error("Mesaj boş olamaz");
       return;
@@ -88,14 +114,87 @@ function ThreadPage() {
               SICAK
             </span>
           )}
+          {thread.locked && (
+            <span className="rounded bg-badge px-1.5 py-0.5 text-[10px] font-semibold text-muted">
+              KİLİTLİ
+            </span>
+          )}
         </div>
         <h1 className="text-lg font-semibold tracking-tight text-fg sm:text-xl">
           {thread.title}
         </h1>
-        <p className="mt-1 text-xs text-subtle">
-          {displayName(thread.authorId, names)} · {formatRelative(thread.createdAt)} ·{" "}
-          {thread.replies} cevap · {thread.views} görüntülenme
+        <p className="mt-1 flex flex-wrap items-center gap-1 text-xs text-subtle">
+          <UserName name={displayName(thread.authorId, names)} size="sm" />
+          <span>· {formatRelative(thread.createdAt)}</span>
+          <span>
+            · {thread.replies} cevap · {thread.views} görüntülenme
+          </span>
         </p>
+
+        {founder && (
+          <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
+            <span className="founder-badge mr-1 inline-flex items-center self-center rounded px-1.5 py-0.5 text-[9px] font-extrabold tracking-wider">
+              KURUCU YETKİLERİ
+            </span>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                togglePin(threadId);
+                toast.success(thread.pinned ? "Sabit kaldırıldı" : "Sabitlendi");
+              }}
+            >
+              <Pin className="size-3.5" />
+              {thread.pinned ? "Sabiti kaldır" : "Sabitle"}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                toggleLock(threadId);
+                toast.success(thread.locked ? "Kilit açıldı" : "Kilitlendi");
+              }}
+            >
+              {thread.locked ? (
+                <Unlock className="size-3.5" />
+              ) : (
+                <Lock className="size-3.5" />
+              )}
+              {thread.locked ? "Kilidi aç" : "Kilitle"}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                toggleHot(threadId);
+                toast.success(
+                  thread.hot ? "Sıcak kaldırıldı" : "Sıcak işaretlendi",
+                );
+              }}
+            >
+              <Flame className="size-3.5" />
+              {thread.hot ? "Sıcak kaldır" : "Sıcak yap"}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              className="border-danger/40 text-danger hover:bg-danger/10"
+              onClick={() => {
+                if (!confirm("Konu ve tüm mesajlar silinsin mi?")) return;
+                deleteThread(threadId);
+                toast.success("Konu silindi");
+                void navigate({ to: "/" });
+              }}
+            >
+              <Trash2 className="size-3.5" />
+              Konuyu sil
+            </Button>
+          </div>
+        )}
       </header>
 
       <div className="space-y-3">
@@ -111,10 +210,12 @@ function ThreadPage() {
                 <aside className="border-b border-border bg-bg-elevated px-3 py-3 sm:border-r sm:border-b-0">
                   <div className="flex items-center gap-2 sm:flex-col sm:items-start sm:gap-2">
                     <Avatar name={name} size="lg" />
-                    <div>
-                      <div className="text-sm font-semibold text-fg">{name}</div>
+                    <div className="min-w-0">
+                      <UserName name={name} size="md" />
                       {author?.title && (
-                        <div className="text-[11px] text-primary">{author.title}</div>
+                        <div className="text-[11px] text-primary">
+                          {author.title}
+                        </div>
                       )}
                       <div className="mt-1 text-[11px] text-subtle">
                         {author ? `${author.posts} mesaj` : "Yerel üye"}
@@ -123,8 +224,24 @@ function ThreadPage() {
                   </div>
                 </aside>
                 <div className="min-w-0 px-4 py-3">
-                  <div className="mb-2 text-[11px] text-subtle">
-                    #{idx + 1} · {formatRelative(post.createdAt)}
+                  <div className="mb-2 flex items-center justify-between gap-2 text-[11px] text-subtle">
+                    <span>
+                      #{idx + 1} · {formatRelative(post.createdAt)}
+                    </span>
+                    {founder && (
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-danger hover:bg-danger/10"
+                        onClick={() => {
+                          if (!confirm("Bu mesaj silinsin mi?")) return;
+                          deletePost(post.id);
+                          toast.success("Mesaj silindi");
+                        }}
+                      >
+                        <Trash2 className="size-3" />
+                        Sil
+                      </button>
+                    )}
                   </div>
                   <div className="text-sm leading-relaxed whitespace-pre-wrap text-fg">
                     {renderBody(post.body)}
@@ -142,25 +259,31 @@ function ThreadPage() {
         )}
       </div>
 
-      <form
-        onSubmit={submit}
-        className="mt-5 rounded-lg border border-border bg-surface p-4 shadow-card"
-      >
-        <h2 className="mb-2 text-sm font-semibold text-fg">Cevap yaz</h2>
-        <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          rows={5}
-          placeholder="Mesajınızı yazın…"
-          className="w-full resize-y rounded-md border border-border bg-bg-elevated px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
-        />
-        <div className="mt-3 flex justify-end">
-          <Button type="submit">
-            <Send className="size-3.5" />
-            Gönder
-          </Button>
-        </div>
-      </form>
+      {thread.locked && !founder ? (
+        <p className="mt-5 rounded-lg border border-border bg-surface px-4 py-6 text-center text-sm text-muted shadow-card">
+          Bu konu kilitli; yeni cevap yazılamaz.
+        </p>
+      ) : (
+        <form
+          onSubmit={submit}
+          className="mt-5 rounded-lg border border-border bg-surface p-4 shadow-card"
+        >
+          <h2 className="mb-2 text-sm font-semibold text-fg">Cevap yaz</h2>
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={5}
+            placeholder="Mesajınızı yazın…"
+            className="w-full resize-y rounded-md border border-border bg-bg-elevated px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
+          />
+          <div className="mt-3 flex justify-end">
+            <Button type="submit">
+              <Send className="size-3.5" />
+              Gönder
+            </Button>
+          </div>
+        </form>
+      )}
     </ForumShell>
   );
 }

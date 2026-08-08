@@ -8,6 +8,8 @@ import { useJobsStore } from "@/lib/jobs/store";
 import { useMembersStore } from "@/lib/members/store";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { formatCount, formatRelative } from "@/lib/utils";
+import { UserName } from "@/components/forum/user-name";
+import { isFounder } from "@/lib/staff/founder";
 
 export function ForumSidebar() {
   const threads = useForumStore((s) => s.threads);
@@ -99,9 +101,13 @@ export function ForumSidebar() {
                 >
                   {t.title}
                 </Link>
-                <p className="mt-0.5 text-[11px] text-subtle">
-                  {formatRelative(t.lastPostAt)} ·{" "}
-                  {displayName(t.lastPosterId, names)}
+                <p className="mt-0.5 flex flex-wrap items-center gap-1 text-[11px] text-subtle">
+                  <span>{formatRelative(t.lastPostAt)} ·</span>
+                  <UserName
+                    name={displayName(t.lastPosterId, names)}
+                    size="sm"
+                    showBadge={false}
+                  />
                 </p>
               </li>
             ))}
@@ -118,13 +124,14 @@ export function ForumSidebar() {
         </p>
         {currentUser?.displayName ? (
           <div className="mt-2">
-            <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-medium text-primary">
-              {currentUser.displayName}
-            </span>
+            <UserName name={currentUser.displayName} size="sm" />
           </div>
         ) : (
-          <p className="mt-1 text-[11px] text-subtle">
-            Giriş yapan üye yok.
+          <p className="mt-1 text-[11px] text-subtle">Giriş yapan üye yok.</p>
+        )}
+        {isFounder(currentUser) && (
+          <p className="mt-2 text-[11px] font-medium text-primary">
+            Kurucu yetkileri aktif.
           </p>
         )}
       </Widget>
@@ -134,7 +141,11 @@ export function ForumSidebar() {
           <Stat label="Konular" value={formatCount(threads.length)} />
           <Stat label="Mesajlar" value={formatCount(posts.length)} />
           <Stat label="Üyeler" value={formatCount(members.length)} />
-          <Stat label="Son üye" value={newestMember} />
+          <Stat
+            label="Son üye"
+            value={newestMember}
+            neon={newestMember !== "—" && true}
+          />
         </dl>
       </Widget>
     </aside>
@@ -163,11 +174,25 @@ function Widget({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  label,
+  value,
+  neon,
+}: {
+  label: string;
+  value: string;
+  neon?: boolean;
+}) {
   return (
     <div className="rounded-md bg-bg-elevated px-2.5 py-2">
       <dt className="text-[11px] text-subtle">{label}</dt>
-      <dd className="truncate text-sm font-semibold text-fg">{value}</dd>
+      <dd className="truncate text-sm font-semibold text-fg">
+        {neon && value !== "—" ? (
+          <UserName name={value} size="sm" showBadge={false} />
+        ) : (
+          value
+        )}
+      </dd>
     </div>
   );
 }
