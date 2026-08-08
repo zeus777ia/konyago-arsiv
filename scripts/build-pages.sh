@@ -2,6 +2,8 @@
 set -eu
 cd "$(dirname "$0")/.."
 export PAGES_BUILD=1
+# Static hosting has no /api/auth — local members only
+export VITE_AUTH_ENABLED=false
 # Prerender fills `.output/public` even if the final nitro step flops on SPA + github_pages.
 set +e
 npx vite build
