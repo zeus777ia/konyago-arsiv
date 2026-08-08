@@ -1,6 +1,10 @@
+import { useEffect, useState } from "react";
 import { isFresh, isUpdatedRecently, type Thread } from "@/lib/forum/data";
 
 export function FreshBadges({ thread }: { thread: Thread }) {
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
+  if (!ready) return null;
   const neu = isFresh(thread.createdAt, 24);
   const upd = isUpdatedRecently(thread);
   if (!neu && !upd) return null;

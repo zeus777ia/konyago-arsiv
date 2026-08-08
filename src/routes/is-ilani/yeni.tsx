@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, ShieldAlert } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useRef, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { ForumShell } from "@/components/forum/layout";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,10 @@ function NewJobPage() {
   const [salaryNote, setSalaryNote] = useState("");
   const [accepted, setAccepted] = useState(false);
   const [honeypot, setHoneypot] = useState("");
-  const formStartedAt = useMemo(() => Date.now(), []);
+  const formStartedAtRef = useRef<number | null>(null);
+  const markFormStart = () => {
+    if (formStartedAtRef.current == null) formStartedAtRef.current = Date.now();
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +63,7 @@ function NewJobPage() {
       toast.error("Kuralları onaylayın");
       return;
     }
-    const spam = runAllSpamChecks({ kind: "job", title, body: description, honeypot, formStartedAt });
+    const spam = runAllSpamChecks({ kind: "job", title, body: description, honeypot, formStartedAt: formStartedAtRef.current ?? Date.now() });
     if (!spam.ok) {
       toast.error(spam.reason);
       return;
@@ -139,6 +142,7 @@ function NewJobPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className={inputCls}
+              onFocus={markFormStart}
               placeholder={
                 type === "isveren"
                   ? "Örn. Garson aranıyor"

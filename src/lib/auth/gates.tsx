@@ -73,7 +73,12 @@ export function UserButton() {
           </span>
         )}
         <div className="hidden min-w-0 flex-col sm:flex">
-          <UserName name={label} size="sm" className="max-w-[9rem] truncate" />
+          <UserName
+            name={label}
+            size="sm"
+            className="max-w-[9rem] truncate"
+            link={false}
+          />
           {founder && (
             <span className="inline-flex items-center gap-0.5 text-[9px] font-bold tracking-wider text-emerald-300 uppercase">
               <Crown className="size-2.5" />

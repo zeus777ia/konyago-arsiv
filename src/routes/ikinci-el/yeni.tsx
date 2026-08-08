@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, ShieldAlert } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useRef, useState } from "react";
 import { SafeMeetingChecklist } from "@/components/forum/safe-meeting";
 import { toast, Toaster } from "sonner";
 import { ForumShell } from "@/components/forum/layout";
@@ -27,7 +27,10 @@ function NewListingPage() {
   const navigate = useNavigate();
   const addListing = useMarketplaceStore((s) => s.addListing);
   const user = useCurrentUser();
-  const formStartedAt = useMemo(() => Date.now(), []);
+  const formStartedAtRef = useRef<number | null>(null);
+  const markFormStart = () => {
+    if (formStartedAtRef.current == null) formStartedAtRef.current = Date.now();
+  };
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<ListingCategory>("diger");
@@ -68,7 +71,7 @@ function NewListingPage() {
       title,
       body: description,
       honeypot,
-      formStartedAt,
+      formStartedAt: formStartedAtRef.current ?? Date.now(),
     });
     if (!spam.ok) {
       toast.error(spam.reason);
@@ -138,6 +141,7 @@ function NewListingPage() {
               onChange={(e) => setTitle(e.target.value)}
               className={inputCls}
               placeholder="Ürün başlığı"
+              onFocus={markFormStart}
             />
           </Field>
           <Field label="Kategori">

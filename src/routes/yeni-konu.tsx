@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, ShieldAlert } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { z } from "zod";
 import { ForumShell } from "@/components/forum/layout";
@@ -28,7 +28,10 @@ function NewTopicPage() {
   const addThread = useForumStore((s) => s.addThread);
   const user = useCurrentUser();
   const founder = isFounder(user);
-  const formStartedAt = useMemo(() => Date.now(), []);
+  const formStartedAtRef = useRef<number | null>(null);
+  const markFormStart = () => {
+    if (formStartedAtRef.current == null) formStartedAtRef.current = Date.now();
+  };
 
   const openCategories = CATEGORIES.filter(
     (c) => founder || !isCategoryLockedForUsers(c.id),
@@ -104,7 +107,7 @@ function NewTopicPage() {
       authorName: user.displayName ?? "Üye",
       asFounder: founder,
       honeypot,
-      formStartedAt,
+      formStartedAt: formStartedAtRef.current ?? Date.now(),
     });
     if (!res.ok) {
       toast.error(res.error);
@@ -195,11 +198,14 @@ function NewTopicPage() {
           <label className="block space-y-1.5">
             <span className="text-xs font-medium text-muted">Başlık</span>
             <input
+              name="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className={inputCls}
               disabled={!user}
               maxLength={120}
+              placeholder="Konu başlığı"
+              onFocus={markFormStart}
             />
           </label>
 
@@ -247,11 +253,14 @@ function NewTopicPage() {
           <label className="block space-y-1.5">
             <span className="text-xs font-medium text-muted">Mesaj</span>
             <textarea
+              name="body"
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={8}
               className={inputCls + " h-auto py-2"}
               disabled={!user}
+              placeholder="Mesajınızı yazın…"
+              onFocus={markFormStart}
             />
           </label>
 

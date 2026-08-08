@@ -17,7 +17,7 @@ import {
   Unlock,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { ForumShell } from "@/components/forum/layout";
 import { Avatar } from "@/components/forum/avatar";
@@ -63,7 +63,10 @@ function ThreadPage() {
   const [body, setBody] = useState("");
   const [honeypot, setHoneypot] = useState("");
   const [quote, setQuote] = useState<QuoteDraft | null>(null);
-  const formStartedAt = useMemo(() => Date.now(), []);
+  const formStartedAtRef = useRef<number | null>(null);
+  const markFormStart = () => {
+    if (formStartedAtRef.current == null) formStartedAtRef.current = Date.now();
+  };
 
   const thread = threads.find((t) => t.id === threadId);
   const category = thread ? getCategory(thread.categoryId) : undefined;
@@ -112,7 +115,7 @@ function ThreadPage() {
       authorName: user?.displayName ?? "Misafir",
       asFounder: founder,
       honeypot,
-      formStartedAt,
+      formStartedAt: formStartedAtRef.current ?? Date.now(),
       quote: quote ?? undefined,
     });
     if (!res.ok) {
@@ -468,6 +471,7 @@ function ThreadPage() {
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
+            onFocus={markFormStart}
             rows={5}
             placeholder="Mesajınızı yazın… (küfür / +18 / yasadışı içerik engellenir)"
             className="w-full resize-y rounded-md border border-border bg-bg-elevated px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
