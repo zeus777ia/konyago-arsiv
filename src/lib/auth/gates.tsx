@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, Navigate } from "@tanstack/react-router";
-import { Crown } from "lucide-react";
+import { Crown, LayoutDashboard } from "lucide-react";
 import { authEnabled, signOut } from "./client";
 import { useCurrentUser, useCurrentUserState } from "./use-current-user";
 import { logoutMember } from "@/lib/members/store";
@@ -39,11 +39,21 @@ export function UserButton() {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5 sm:gap-2">
       <Link
         to="/hesabim"
+        search={{ sekme: "ozet" }}
+        className="hidden items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-header-muted hover:bg-white/10 hover:text-header-fg sm:inline-flex"
+        title="Kullanıcı paneli"
+      >
+        <LayoutDashboard className="size-3.5" />
+        Panel
+      </Link>
+      <Link
+        to="/hesabim"
+        search={{ sekme: "ozet" }}
         className="flex min-w-0 items-center gap-2 rounded-md px-1 py-0.5 hover:bg-white/10"
-        title="Hesabım"
+        title="Hesap yönetimi"
       >
         {user.profileImageUrl ? (
           <img
