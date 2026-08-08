@@ -1,14 +1,8 @@
 # KonyaGo Arşiv
 
-**konyagoarsiv.org** — Konya odaklı topluluk: forum, ikinci el ilan panosu ve iş panosu.
+Canlı site: **https://konyagoarsiv.org**
 
-## Özellikler
-
-- Forum: kategori grupları, konular, cevaplar
-- **İkinci el pano:** fazla ürün ilanı; sitede ödeme yok, alıcı-satıcı dışarıda anlaşır
-- **İş panosu:** işveren ve iş arayan ilanları; görüşme site dışında
-- Yan menü, arama, mobil uyumlu arayüz
-- Demo veriler (tarayıcıda localStorage ile kalıcı yeni ilan/konu)
+Konya odaklı topluluk — forum, ikinci el ilan panosu, iş panosu.
 
 ## Geliştirme
 
@@ -16,11 +10,7 @@
 npm install
 npm run dev
 npm run build
-npm run typecheck
+npm run build:pages   # GitHub Pages statik çıktı → pages-dist/
 ```
 
-Stack: React 19, TanStack Start, Tailwind v4, Zustand.
-
-## Domain
-
-https://konyagoarsiv.org · [konyago.com.tr](https://konyago.com.tr)
+`main` dalına push → GitHub Actions Pages deploy.

@@ -3,7 +3,6 @@ import {
   Briefcase,
   Home,
   Menu,
-  MessageSquarePlus,
   PenSquare,
   Search,
   ShoppingBag,
@@ -45,13 +44,8 @@ export function ForumShell({
             <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-fg">
               KA
             </span>
-            <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold tracking-tight sm:text-base">
-                {SITE.name}
-              </span>
-              <span className="hidden truncate text-[11px] text-header-muted sm:block">
-                {SITE.domain}
-              </span>
+            <span className="truncate text-sm font-semibold tracking-tight sm:text-base">
+              {SITE.name}
             </span>
           </Link>
 
@@ -68,7 +62,7 @@ export function ForumShell({
               <UserButton />
             ) : (
               <Button variant="header" size="sm" asChild>
-                <Link to="/login">Giriş</Link>
+                <Link to="/login">Giriş / Kayıt</Link>
               </Button>
             )}
           </div>
@@ -84,13 +78,6 @@ export function ForumShell({
             </NavLink>
             <NavLink to="/is-ilani" icon={<Briefcase className="size-3.5" />}>
               İş panosu
-            </NavLink>
-            <NavLink
-              to="/yeni-mesajlar"
-              icon={<MessageSquarePlus className="size-3.5" />}
-              className="hidden sm:inline-flex"
-            >
-              Yeni mesajlar
             </NavLink>
             <NavLink
               to="/yeni-konu"
@@ -117,7 +104,7 @@ export function ForumShell({
 
       {mobileOpen && (
         <div className="border-b border-border bg-surface px-3 py-3 lg:hidden">
-          <label className="relative mb-2 block">
+          <label className="relative block">
             <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-subtle" />
             <input
               type="search"
@@ -127,31 +114,32 @@ export function ForumShell({
               className="h-10 w-full rounded-md border border-border bg-bg-elevated py-2 pr-3 pl-9 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
             />
           </label>
-          <p className="text-xs text-muted">{SITE.tagline}</p>
         </div>
       )}
 
-      <div className="mx-auto max-w-6xl px-3 py-4 sm:px-4 sm:py-6">
-        <p className="mb-4 hidden text-sm text-muted sm:block">{SITE.tagline}</p>
-        {children}
-      </div>
+      <div className="mx-auto max-w-6xl px-3 py-4 sm:px-4 sm:py-6">{children}</div>
 
       <footer className="mt-4 border-t border-border bg-surface">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-3 py-5 text-xs text-muted sm:flex-row sm:items-center sm:justify-between sm:px-4">
           <p>
-            © {new Date().getFullYear()} {SITE.name} · {SITE.domain}
+            © {new Date().getFullYear()} {SITE.name}
           </p>
-          <p className="text-subtle">
-            KonyaGo ailesi ·{" "}
+          <div className="flex flex-wrap gap-3">
+            <Link to="/ikinci-el" className="hover:text-primary">
+              İkinci el
+            </Link>
+            <Link to="/is-ilani" className="hover:text-primary">
+              İş panosu
+            </Link>
             <a
               href="https://konyago.com.tr"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="hover:text-primary"
             >
               konyago.com.tr
             </a>
-          </p>
+          </div>
         </div>
       </footer>
     </div>
