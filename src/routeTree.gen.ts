@@ -22,6 +22,7 @@ import { Route as SssRouteImport } from './routes/sss'
 import { Route as YasalUyariRouteImport } from './routes/yasal-uyari'
 import { Route as YeniKonuRouteImport } from './routes/yeni-konu'
 import { Route as YeniMesajlarRouteImport } from './routes/yeni-mesajlar'
+import { Route as ApiSyncRouteImport } from './routes/api/sync'
 import { Route as IkinciElIndexRouteImport } from './routes/ikinci-el/index'
 import { Route as IkinciElListingIdRouteImport } from './routes/ikinci-el/$listingId'
 import { Route as IkinciElYeniRouteImport } from './routes/ikinci-el/yeni'
@@ -98,6 +99,11 @@ const YeniMesajlarRoute = YeniMesajlarRouteImport.update({
   path: '/yeni-mesajlar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiSyncRoute = ApiSyncRouteImport.update({
+  id: '/api/sync',
+  path: '/api/sync',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IkinciElIndexRoute = IkinciElIndexRouteImport.update({
   id: '/ikinci-el/',
   path: '/ikinci-el/',
@@ -163,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/yasal-uyari': typeof YasalUyariRoute
   '/yeni-konu': typeof YeniKonuRoute
   '/yeni-mesajlar': typeof YeniMesajlarRoute
+  '/api/sync': typeof ApiSyncRoute
   '/ikinci-el/$listingId': typeof IkinciElListingIdRoute
   '/ikinci-el/yeni': typeof IkinciElYeniRoute
   '/is-ilani/$jobId': typeof IsIlaniJobIdRoute
@@ -188,6 +195,7 @@ export interface FileRoutesByTo {
   '/yasal-uyari': typeof YasalUyariRoute
   '/yeni-konu': typeof YeniKonuRoute
   '/yeni-mesajlar': typeof YeniMesajlarRoute
+  '/api/sync': typeof ApiSyncRoute
   '/ikinci-el/$listingId': typeof IkinciElListingIdRoute
   '/ikinci-el/yeni': typeof IkinciElYeniRoute
   '/is-ilani/$jobId': typeof IsIlaniJobIdRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/yasal-uyari': typeof YasalUyariRoute
   '/yeni-konu': typeof YeniKonuRoute
   '/yeni-mesajlar': typeof YeniMesajlarRoute
+  '/api/sync': typeof ApiSyncRoute
   '/ikinci-el/$listingId': typeof IkinciElListingIdRoute
   '/ikinci-el/yeni': typeof IkinciElYeniRoute
   '/is-ilani/$jobId': typeof IsIlaniJobIdRoute
@@ -241,6 +250,7 @@ export interface FileRouteTypes {
     | '/yasal-uyari'
     | '/yeni-konu'
     | '/yeni-mesajlar'
+    | '/api/sync'
     | '/ikinci-el/$listingId'
     | '/ikinci-el/yeni'
     | '/is-ilani/$jobId'
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/yasal-uyari'
     | '/yeni-konu'
     | '/yeni-mesajlar'
+    | '/api/sync'
     | '/ikinci-el/$listingId'
     | '/ikinci-el/yeni'
     | '/is-ilani/$jobId'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/yasal-uyari'
     | '/yeni-konu'
     | '/yeni-mesajlar'
+    | '/api/sync'
     | '/ikinci-el/$listingId'
     | '/ikinci-el/yeni'
     | '/is-ilani/$jobId'
@@ -317,6 +329,7 @@ export interface RootRouteChildren {
   YasalUyariRoute: typeof YasalUyariRoute
   YeniKonuRoute: typeof YeniKonuRoute
   YeniMesajlarRoute: typeof YeniMesajlarRoute
+  ApiSyncRoute: typeof ApiSyncRoute
   IkinciElListingIdRoute: typeof IkinciElListingIdRoute
   IkinciElYeniRoute: typeof IkinciElYeniRoute
   IsIlaniJobIdRoute: typeof IsIlaniJobIdRoute
@@ -422,6 +435,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof YeniMesajlarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/sync': {
+      id: '/api/sync'
+      path: '/api/sync'
+      fullPath: '/api/sync'
+      preLoaderRoute: typeof ApiSyncRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ikinci-el/': {
       id: '/ikinci-el/'
       path: '/ikinci-el'
@@ -509,6 +529,7 @@ const rootRouteChildren: RootRouteChildren = {
   YasalUyariRoute: YasalUyariRoute,
   YeniKonuRoute: YeniKonuRoute,
   YeniMesajlarRoute: YeniMesajlarRoute,
+  ApiSyncRoute: ApiSyncRoute,
   IkinciElListingIdRoute: IkinciElListingIdRoute,
   IkinciElYeniRoute: IkinciElYeniRoute,
   IsIlaniJobIdRoute: IsIlaniJobIdRoute,

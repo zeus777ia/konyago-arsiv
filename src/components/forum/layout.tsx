@@ -24,6 +24,7 @@ import { useForumStore } from "@/lib/forum/store";
 import { useReportsStore } from "@/lib/reports/store";
 import { NotificationBell } from "@/components/forum/notification-bell";
 import { FounderBanner } from "@/components/forum/founder-banner";
+import { SyncProvider, SyncStatusPill } from "@/components/forum/sync-provider";
 
 export function ForumShell({
   children,
@@ -62,6 +63,7 @@ export function ForumShell({
 
   return (
     <div className="min-h-dvh bg-bg text-fg">
+      <SyncProvider />
       <SeedOfficialForum />
       <div className="bg-header text-header-fg shadow-header">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-3 py-2.5 sm:px-4">
@@ -139,9 +141,12 @@ export function ForumShell({
             >
               Yeni konu
             </NavLink>
+            <div className="ml-auto hidden items-center gap-2 md:flex">
+              <SyncStatusPill />
+            </div>
             <form
               onSubmit={goSearch}
-              className="ml-auto hidden w-full max-w-xs md:block md:w-auto md:flex-1 md:max-w-sm"
+              className="hidden w-full max-w-xs md:block md:w-auto md:flex-1 md:max-w-sm"
             >
               <label className="relative block">
                 <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-header-muted" />
