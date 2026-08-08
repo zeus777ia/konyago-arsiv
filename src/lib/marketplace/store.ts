@@ -1,10 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import {
-  SEED_LISTINGS,
-  type ListingCategory,
-  type ListingCondition,
-  type MarketplaceListing,
+import type {
+  ListingCategory,
+  ListingCondition,
+  MarketplaceListing,
 } from "./data";
 
 type MarketState = {
@@ -29,7 +28,7 @@ function id() {
 export const useMarketplaceStore = create<MarketState>()(
   persist(
     (set, get) => ({
-      listings: SEED_LISTINGS,
+      listings: [],
       addListing: (input) => {
         const listingId = id();
         const listing: MarketplaceListing = {
@@ -56,6 +55,6 @@ export const useMarketplaceStore = create<MarketState>()(
         });
       },
     }),
-    { name: "konyago-arsiv-market-v1" },
+    { name: "konyago-arsiv-market-v2" },
   ),
 );

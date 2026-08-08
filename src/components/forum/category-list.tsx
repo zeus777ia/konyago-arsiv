@@ -7,6 +7,7 @@ import { useForumStore } from "@/lib/forum/store";
 
 export function CategoryList({ filter = "" }: { filter?: string }) {
   const threads = useForumStore((s) => s.threads);
+  const posts = useForumStore((s) => s.posts);
   const names = useForumStore((s) => s.names);
   const q = filter.trim().toLowerCase();
   const groups = categoryGroups()
@@ -39,11 +40,14 @@ export function CategoryList({ filter = "" }: { filter?: string }) {
           </header>
           <ul className="divide-y divide-border">
             {cats.map((cat) => {
-              const last = [...threads]
-                .filter((t) => t.categoryId === cat.id)
-                .sort(
-                  (a, b) => +new Date(b.lastPostAt) - +new Date(a.lastPostAt),
-                )[0];
+              const catThreads = threads.filter((t) => t.categoryId === cat.id);
+              const topicCount = catThreads.length;
+              const postCount = posts.filter((p) =>
+                catThreads.some((t) => t.id === p.threadId),
+              ).length;
+              const last = [...catThreads].sort(
+                (a, b) => +new Date(b.lastPostAt) - +new Date(a.lastPostAt),
+              )[0];
               return (
                 <li
                   key={cat.id}
@@ -77,7 +81,7 @@ export function CategoryList({ filter = "" }: { filter?: string }) {
                   <div className="flex items-center gap-4 pl-[52px] sm:pl-0">
                     <div className="text-center">
                       <div className="text-sm font-semibold tabular-nums text-fg">
-                        {formatCount(cat.topics)}
+                        {formatCount(topicCount)}
                       </div>
                       <div className="text-[10px] tracking-wide text-subtle uppercase">
                         Konu
@@ -85,7 +89,7 @@ export function CategoryList({ filter = "" }: { filter?: string }) {
                     </div>
                     <div className="text-center">
                       <div className="text-sm font-semibold tabular-nums text-fg">
-                        {formatCount(cat.posts)}
+                        {formatCount(postCount)}
                       </div>
                       <div className="text-[10px] tracking-wide text-subtle uppercase">
                         Mesaj
@@ -168,123 +172,119 @@ export function LatestThreadsTable({
         )}
       </header>
 
-      <div className="hidden overflow-x-auto md:block">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="border-b border-border bg-row text-[11px] tracking-wide text-subtle uppercase">
-            <tr>
-              <th className="px-4 py-2 font-medium">Konu</th>
-              <th className="px-3 py-2 font-medium">Forum</th>
-              <th className="px-3 py-2 text-right font-medium">Cevap</th>
-              <th className="px-3 py-2 text-right font-medium">Hit</th>
-              <th className="px-4 py-2 text-right font-medium">Son yazan</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {list.map((t, i) => {
+      {list.length > 0 ? (
+        <>
+          <div className="hidden overflow-x-auto md:block">
+            <table className="w-full min-w-[720px] text-left text-sm">
+              <thead className="border-b border-border bg-row text-[11px] tracking-wide text-subtle uppercase">
+                <tr>
+                  <th className="px-4 py-2 font-medium">Konu</th>
+                  <th className="px-3 py-2 font-medium">Forum</th>
+                  <th className="px-3 py-2 text-right font-medium">Cevap</th>
+                  <th className="px-3 py-2 text-right font-medium">Hit</th>
+                  <th className="px-4 py-2 text-right font-medium">Son yazan</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {list.map((t, i) => {
+                  const category = getCategory(t.categoryId);
+                  return (
+                    <tr
+                      key={t.id}
+                      className={i % 2 === 0 ? "bg-row-alt" : "bg-row"}
+                    >
+                      <td className="px-4 py-2.5">
+                        <div className="flex items-start gap-2">
+                          {t.pinned && (
+                            <span className="mt-0.5 rounded bg-primary-soft px-1.5 py-0.5 text-[10px] font-semibold text-primary">
+                              SABİT
+                            </span>
+                          )}
+                          {t.hot && (
+                            <span className="mt-0.5 rounded bg-accent-soft px-1.5 py-0.5 text-[10px] font-semibold text-accent">
+                              SICAK
+                            </span>
+                          )}
+                          <div className="min-w-0">
+                            <Link
+                              to="/konu/$threadId"
+                              params={{ threadId: t.id }}
+                              className="font-medium text-fg hover:text-primary"
+                            >
+                              {t.title}
+                            </Link>
+                            <p className="text-[11px] text-subtle">
+                              {displayName(t.authorId, names)} ·{" "}
+                              {formatRelative(t.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2.5 text-xs text-muted">
+                        {category ? (
+                          <Link
+                            to="/kategori/$categoryId"
+                            params={{ categoryId: category.id }}
+                            className="hover:text-primary hover:underline"
+                          >
+                            {category.name}
+                          </Link>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td className="px-3 py-2.5 text-right tabular-nums text-muted">
+                        {t.replies}
+                      </td>
+                      <td className="px-3 py-2.5 text-right tabular-nums text-muted">
+                        {formatCount(t.views)}
+                      </td>
+                      <td className="px-4 py-2.5 text-right">
+                        <div className="text-xs font-medium text-fg">
+                          {displayName(t.lastPosterId, names)}
+                        </div>
+                        <div className="text-[11px] text-subtle">
+                          {formatRelative(t.lastPostAt)}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <ul className="divide-y divide-border md:hidden">
+            {list.map((t) => {
               const category = getCategory(t.categoryId);
               return (
-                <tr
-                  key={t.id}
-                  className={i % 2 === 0 ? "bg-row-alt" : "bg-row"}
-                >
-                  <td className="px-4 py-2.5">
-                    <div className="flex items-start gap-2">
-                      {t.pinned && (
-                        <span className="mt-0.5 rounded bg-primary-soft px-1.5 py-0.5 text-[10px] font-semibold text-primary">
-                          SABİT
-                        </span>
-                      )}
-                      {t.hot && (
-                        <span className="mt-0.5 rounded bg-accent-soft px-1.5 py-0.5 text-[10px] font-semibold text-accent">
-                          SICAK
-                        </span>
-                      )}
-                      <div className="min-w-0">
-                        <Link
-                          to="/konu/$threadId"
-                          params={{ threadId: t.id }}
-                          className="font-medium text-fg hover:text-primary"
-                        >
-                          {t.title}
-                        </Link>
-                        <p className="text-[11px] text-subtle">
-                          {displayName(t.authorId, names)} ·{" "}
-                          {formatRelative(t.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-3 py-2.5 text-xs text-muted">
-                    {category ? (
-                      <Link
-                        to="/kategori/$categoryId"
-                        params={{ categoryId: category.id }}
-                        className="hover:text-primary hover:underline"
-                      >
-                        {category.name}
-                      </Link>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                  <td className="px-3 py-2.5 text-right tabular-nums text-muted">
-                    {t.replies}
-                  </td>
-                  <td className="px-3 py-2.5 text-right tabular-nums text-muted">
-                    {formatCount(t.views)}
-                  </td>
-                  <td className="px-4 py-2.5 text-right">
-                    <div className="text-xs font-medium text-fg">
-                      {displayName(t.lastPosterId, names)}
-                    </div>
-                    <div className="text-[11px] text-subtle">
-                      {formatRelative(t.lastPostAt)}
-                    </div>
-                  </td>
-                </tr>
+                <li key={t.id} className="px-3 py-3">
+                  <Link
+                    to="/konu/$threadId"
+                    params={{ threadId: t.id }}
+                    className="text-sm font-medium text-fg hover:text-primary"
+                  >
+                    {t.title}
+                  </Link>
+                  <p className="mt-1 text-[11px] text-subtle">
+                    {category?.name} · {t.replies} cevap ·{" "}
+                    {formatRelative(t.lastPostAt)}
+                  </p>
+                </li>
               );
             })}
-          </tbody>
-        </table>
-      </div>
-
-      <ul className="divide-y divide-border md:hidden">
-        {list.map((t) => {
-          const category = getCategory(t.categoryId);
-          return (
-            <li key={t.id} className="px-3 py-3">
-              <div className="mb-1 flex flex-wrap gap-1">
-                {t.pinned && (
-                  <span className="rounded bg-primary-soft px-1.5 py-0.5 text-[10px] font-semibold text-primary">
-                    SABİT
-                  </span>
-                )}
-                {t.hot && (
-                  <span className="rounded bg-accent-soft px-1.5 py-0.5 text-[10px] font-semibold text-accent">
-                    SICAK
-                  </span>
-                )}
-              </div>
-              <Link
-                to="/konu/$threadId"
-                params={{ threadId: t.id }}
-                className="text-sm font-medium text-fg hover:text-primary"
-              >
-                {t.title}
-              </Link>
-              <p className="mt-1 text-[11px] text-subtle">
-                {category?.name} · {t.replies} cevap ·{" "}
-                {formatRelative(t.lastPostAt)}
-              </p>
-            </li>
-          );
-        })}
-      </ul>
-
-      {!list.length && (
-        <p className="px-4 py-8 text-center text-sm text-muted">
-          Eşleşen konu bulunamadı.
-        </p>
+          </ul>
+        </>
+      ) : (
+        <div className="px-4 py-10 text-center">
+          <p className="text-sm text-muted">Henüz konu yok.</p>
+          <Link
+            to="/yeni-konu"
+            className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
+          >
+            İlk konuyu sen aç
+          </Link>
+        </div>
       )}
     </section>
   );

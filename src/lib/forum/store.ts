@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { POSTS, THREADS, type Post, type Thread } from "./data";
+import type { Post, Thread } from "./data";
 
 type ForumState = {
   threads: Thread[];
@@ -17,6 +17,7 @@ type ForumState = {
     body: string;
     authorName: string;
   }) => void;
+  bumpViews: (threadId: string) => void;
 };
 
 function id(prefix: string) {
@@ -26,8 +27,8 @@ function id(prefix: string) {
 export const useForumStore = create<ForumState>()(
   persist(
     (set, get) => ({
-      threads: THREADS,
-      posts: POSTS,
+      threads: [],
+      posts: [],
       names: {},
       addThread: ({ categoryId, title, body, authorName }) => {
         const threadId = id("t");
@@ -83,8 +84,16 @@ export const useForumStore = create<ForumState>()(
           ),
         });
       },
+      bumpViews: (threadId) => {
+        set({
+          threads: get().threads.map((t) =>
+            t.id === threadId ? { ...t, views: t.views + 1 } : t,
+          ),
+        });
+      },
     }),
-    { name: "konyago-arsiv-forum-v1" },
+    // v2 = boş başlangıç (eski demo veriyi siler)
+    { name: "konyago-arsiv-forum-v2" },
   ),
 );
 

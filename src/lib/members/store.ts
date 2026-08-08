@@ -35,11 +35,12 @@ function id() {
   return `mbr_${Math.random().toString(36).slice(2, 12)}`;
 }
 
-/** Lightweight browser hash — demo membership, not bank-grade. */
 async function hashPassword(password: string, salt: string): Promise<string> {
   const data = new TextEncoder().encode(`${salt}:${password}`);
   const buf = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  return [...new Uint8Array(buf)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function normalizeEmail(email: string) {
@@ -51,24 +52,7 @@ export const useMembersStore = create<MembersState>()(
     (set, get) => ({
       members: [],
       session: null,
-      register: ({ email, password, displayName }) => {
-        const em = normalizeEmail(email);
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
-          return { ok: false, error: "Geçerli bir e-posta girin" };
-        }
-        if (password.length < 6) {
-          return { ok: false, error: "Şifre en az 6 karakter olmalı" };
-        }
-        if (displayName.trim().length < 2) {
-          return { ok: false, error: "Görünen ad en az 2 karakter" };
-        }
-        if (get().members.some((m) => m.email === em)) {
-          return { ok: false, error: "Bu e-posta zaten kayıtlı" };
-        }
-        // sync path with precomputed salt; hash stored after promise via temporary sync salt
-        // Use deterministic sync hash for store API simplicity (crypto.subtle is async)
-        return { ok: false, error: "__ASYNC__" };
-      },
+      register: () => ({ ok: false, error: "__ASYNC__" }),
       login: () => ({ ok: false, error: "__ASYNC__" }),
       logout: () => set({ session: null }),
       updateProfile: (displayName) => {
@@ -84,11 +68,11 @@ export const useMembersStore = create<MembersState>()(
         });
       },
     }),
-    { name: "konyago-arsiv-members-v1" },
+    // v2: temiz başlangıç (demo hesapları sıfırla)
+    { name: "konyago-arsiv-members-v2" },
   ),
 );
 
-/** Async register — preferred API */
 export async function registerMember(input: {
   email: string;
   password: string;

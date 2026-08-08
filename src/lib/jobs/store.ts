@@ -1,11 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import {
-  SEED_JOBS,
-  type JobKind,
-  type JobListing,
-  type JobType,
-} from "./data";
+import type { JobKind, JobListing, JobType } from "./data";
 
 type JobsState = {
   jobs: JobListing[];
@@ -30,7 +25,7 @@ function id() {
 export const useJobsStore = create<JobsState>()(
   persist(
     (set, get) => ({
-      jobs: SEED_JOBS,
+      jobs: [],
       addJob: (input) => {
         const jobId = id();
         const job: JobListing = {
@@ -58,6 +53,6 @@ export const useJobsStore = create<JobsState>()(
         });
       },
     }),
-    { name: "konyago-arsiv-jobs-v1" },
+    { name: "konyago-arsiv-jobs-v2" },
   ),
 );
