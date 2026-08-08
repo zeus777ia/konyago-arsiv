@@ -1,10 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import {
+  Briefcase,
   Home,
   Menu,
   MessageSquarePlus,
   PenSquare,
   Search,
+  ShoppingBag,
   X,
 } from "lucide-react";
 import { useState } from "react";
@@ -54,10 +56,7 @@ export function ForumShell({
           </Link>
 
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-            <Link
-              to="/yeni-konu"
-              className="hidden sm:inline-flex"
-            >
+            <Link to="/yeni-konu" className="hidden sm:inline-flex">
               <Button size="sm" className="gap-1.5">
                 <PenSquare className="size-3.5" />
                 Yeni konu
@@ -80,10 +79,24 @@ export function ForumShell({
             <NavLink to="/" icon={<Home className="size-3.5" />}>
               Ana sayfa
             </NavLink>
-            <NavLink to="/yeni-mesajlar" icon={<MessageSquarePlus className="size-3.5" />}>
+            <NavLink to="/ikinci-el" icon={<ShoppingBag className="size-3.5" />}>
+              İkinci el
+            </NavLink>
+            <NavLink to="/is-ilani" icon={<Briefcase className="size-3.5" />}>
+              İş panosu
+            </NavLink>
+            <NavLink
+              to="/yeni-mesajlar"
+              icon={<MessageSquarePlus className="size-3.5" />}
+              className="hidden sm:inline-flex"
+            >
               Yeni mesajlar
             </NavLink>
-            <NavLink to="/yeni-konu" icon={<PenSquare className="size-3.5" />} className="sm:hidden">
+            <NavLink
+              to="/yeni-konu"
+              icon={<PenSquare className="size-3.5" />}
+              className="sm:hidden"
+            >
               Yeni konu
             </NavLink>
             <div className="ml-auto hidden w-full max-w-xs md:block md:w-auto md:flex-1 md:max-w-sm">
@@ -93,7 +106,7 @@ export function ForumShell({
                   type="search"
                   value={search ?? ""}
                   onChange={(e) => onSearch?.(e.target.value)}
-                  placeholder="Forumda ara…"
+                  placeholder="Ara…"
                   className="h-8 w-full rounded-md border border-white/10 bg-white/10 py-1 pr-3 pl-8 text-xs text-header-fg placeholder:text-header-muted outline-none focus:border-white/25 focus:bg-white/15"
                 />
               </label>
@@ -110,7 +123,7 @@ export function ForumShell({
               type="search"
               value={search ?? ""}
               onChange={(e) => onSearch?.(e.target.value)}
-              placeholder="Forumda ara…"
+              placeholder="Ara…"
               className="h-10 w-full rounded-md border border-border bg-bg-elevated py-2 pr-3 pl-9 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
             />
           </label>

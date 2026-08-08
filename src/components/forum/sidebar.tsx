@@ -1,13 +1,21 @@
 import { Link } from "@tanstack/react-router";
-import { Flame, Users } from "lucide-react";
+import { Briefcase, Flame, ShoppingBag, Users } from "lucide-react";
 import { STATS, getCategory, hotThreads } from "@/lib/forum/data";
 import { displayName } from "@/lib/forum/names";
 import { useForumStore } from "@/lib/forum/store";
+import { useMarketplaceStore } from "@/lib/marketplace/store";
+import { useJobsStore } from "@/lib/jobs/store";
 import { formatCount, formatRelative } from "@/lib/utils";
 
 export function ForumSidebar() {
   const threads = useForumStore((s) => s.threads);
   const names = useForumStore((s) => s.names);
+  const marketN = useMarketplaceStore(
+    (s) => s.listings.filter((l) => l.status === "aktif").length,
+  );
+  const jobN = useJobsStore(
+    (s) => s.jobs.filter((j) => j.status === "aktif").length,
+  );
 
   const extraHot = [...threads]
     .filter((t) => t.hot || t.replies > 40)
@@ -22,6 +30,27 @@ export function ForumSidebar() {
 
   return (
     <aside className="space-y-4">
+      <Widget title="Hızlı panolar">
+        <div className="space-y-2">
+          <Link
+            to="/ikinci-el"
+            className="flex items-center gap-2 rounded-md bg-bg-elevated px-2.5 py-2 text-sm font-medium text-fg hover:bg-surface-hover"
+          >
+            <ShoppingBag className="size-4 text-accent" />
+            İkinci el
+            <span className="ml-auto text-[11px] text-subtle">{marketN}</span>
+          </Link>
+          <Link
+            to="/is-ilani"
+            className="flex items-center gap-2 rounded-md bg-bg-elevated px-2.5 py-2 text-sm font-medium text-fg hover:bg-surface-hover"
+          >
+            <Briefcase className="size-4 text-primary" />
+            İş panosu
+            <span className="ml-auto text-[11px] text-subtle">{jobN}</span>
+          </Link>
+        </div>
+      </Widget>
+
       <Widget title="Sıcak konular" icon={<Flame className="size-3.5 text-accent" />}>
         <ul className="divide-y divide-border">
           {list.map((t) => {

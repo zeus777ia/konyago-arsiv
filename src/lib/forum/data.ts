@@ -43,7 +43,8 @@ export type Post = {
 export const SITE = {
   name: "KonyaGo Arşiv",
   domain: "konyagoarsiv.org",
-  tagline: "Konya’nın dijital hafızası — gezi, tarih, mutfak ve şehir sohbeti",
+  tagline:
+    "Konya’nın dijital hafızası — gezi, sohbet, ikinci el ilan ve iş panosu",
   url: "https://konyagoarsiv.org",
 } as const;
 
@@ -389,14 +390,14 @@ export const POSTS: Post[] = [
     createdAt: days(40),
     body: `KonyaGo Arşiv’e hoş geldiniz.
 
-Bu forum, Konya’nın dijital hafızasını birlikte büyütmek için açıldı: gezi notları, tarih kaynakları, mutfak önerileri, fotoğraflar ve şehir sohbeti.
+Bu site Konya’nın dijital hafızası: gezi notları, tarih, mutfak, ikinci el ilan panosu ve iş panosu.
 
 **Temel kurallar**
 1. Saygılı dil kullanın; kişilere ve kurumlara hakaret yok.
 2. Yanlış bilgi yerine kaynak veya deneyim paylaşın.
-3. Reklam ve spam yasaktır — yerel işletme önerisi “deneyim” formatında olmalı.
-4. Telifli içerik paylaşırken kaynak belirtin.
-5. Siyaset ve kutuplaştırıcı tartışmalar bu arşive ait değildir.
+3. Spam yasaktır.
+4. İkinci el ve iş panolarında sitede para ticareti / ödeme yoktur; yalnızca ilan ve iletişim.
+5. Telifli içerikte kaynak belirtin.
 
 İyi forumlar dileriz.
 — KonyaGo Arşiv ekibi`,
@@ -444,7 +445,7 @@ Benim 2026 notlarım:
 - Meram tarafında aile usulü yerler daha sakin  
 - Ayran + köz biber kombosu hâlâ yenilmez  
 
-Siz de adres yazın; listeyi güncelleyelim. (Spam değil, gerçek deneyim lütfen.)`,
+Siz de adres yazın; listeyi güncelleyelim.`,
   },
   {
     id: "p6",
@@ -515,11 +516,11 @@ Yazın su + şapka unutulmasın.`,
     threadId: "t14",
     authorId: "u1",
     createdAt: days(7),
-    body: `KonyaGo AI artık arşiv sohbetleriyle de beslenebiliyor.
+    body: `KonyaGo AI, arşiv sohbetleri ve şehir notlarıyla daha iyi öneri verebiliyor.
 
-Forumda biriken gezi notları, rota önerileri ve mutfak deneyimleri şehir asistanına daha iyi cevaplar için referans olacak.
+Gezi, rota ve mutfak deneyimlerinizi forumda paylaşın; şehir asistanı için de faydalı olur.
 
-Soru sormak için konyago.com.tr üzerinden AI’ya da bakabilirsiniz.`,
+konyago.com.tr üzerinden de bakabilirsiniz.`,
   },
 ];
 

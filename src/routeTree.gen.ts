@@ -13,6 +13,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as YeniKonuRouteImport } from './routes/yeni-konu'
 import { Route as YeniMesajlarRouteImport } from './routes/yeni-mesajlar'
+import { Route as IkinciElIndexRouteImport } from './routes/ikinci-el/index'
+import { Route as IkinciElListingIdRouteImport } from './routes/ikinci-el/$listingId'
+import { Route as IkinciElYeniRouteImport } from './routes/ikinci-el/yeni'
+import { Route as IsIlaniIndexRouteImport } from './routes/is-ilani/index'
+import { Route as IsIlaniJobIdRouteImport } from './routes/is-ilani/$jobId'
+import { Route as IsIlaniYeniRouteImport } from './routes/is-ilani/yeni'
 import { Route as KategoriCategoryIdRouteImport } from './routes/kategori.$categoryId'
 import { Route as KonuThreadIdRouteImport } from './routes/konu.$threadId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -37,6 +43,36 @@ const YeniMesajlarRoute = YeniMesajlarRouteImport.update({
   path: '/yeni-mesajlar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IkinciElIndexRoute = IkinciElIndexRouteImport.update({
+  id: '/ikinci-el/',
+  path: '/ikinci-el/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IkinciElListingIdRoute = IkinciElListingIdRouteImport.update({
+  id: '/ikinci-el/$listingId',
+  path: '/ikinci-el/$listingId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IkinciElYeniRoute = IkinciElYeniRouteImport.update({
+  id: '/ikinci-el/yeni',
+  path: '/ikinci-el/yeni',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IsIlaniIndexRoute = IsIlaniIndexRouteImport.update({
+  id: '/is-ilani/',
+  path: '/is-ilani/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IsIlaniJobIdRoute = IsIlaniJobIdRouteImport.update({
+  id: '/is-ilani/$jobId',
+  path: '/is-ilani/$jobId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IsIlaniYeniRoute = IsIlaniYeniRouteImport.update({
+  id: '/is-ilani/yeni',
+  path: '/is-ilani/yeni',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KategoriCategoryIdRoute = KategoriCategoryIdRouteImport.update({
   id: '/kategori/$categoryId',
   path: '/kategori/$categoryId',
@@ -58,8 +94,14 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/yeni-konu': typeof YeniKonuRoute
   '/yeni-mesajlar': typeof YeniMesajlarRoute
+  '/ikinci-el/$listingId': typeof IkinciElListingIdRoute
+  '/ikinci-el/yeni': typeof IkinciElYeniRoute
+  '/is-ilani/$jobId': typeof IsIlaniJobIdRoute
+  '/is-ilani/yeni': typeof IsIlaniYeniRoute
   '/kategori/$categoryId': typeof KategoriCategoryIdRoute
   '/konu/$threadId': typeof KonuThreadIdRoute
+  '/ikinci-el/': typeof IkinciElIndexRoute
+  '/is-ilani/': typeof IsIlaniIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
@@ -67,8 +109,14 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/yeni-konu': typeof YeniKonuRoute
   '/yeni-mesajlar': typeof YeniMesajlarRoute
+  '/ikinci-el/$listingId': typeof IkinciElListingIdRoute
+  '/ikinci-el/yeni': typeof IkinciElYeniRoute
+  '/is-ilani/$jobId': typeof IsIlaniJobIdRoute
+  '/is-ilani/yeni': typeof IsIlaniYeniRoute
   '/kategori/$categoryId': typeof KategoriCategoryIdRoute
   '/konu/$threadId': typeof KonuThreadIdRoute
+  '/ikinci-el': typeof IkinciElIndexRoute
+  '/is-ilani': typeof IsIlaniIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
@@ -77,8 +125,14 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/yeni-konu': typeof YeniKonuRoute
   '/yeni-mesajlar': typeof YeniMesajlarRoute
+  '/ikinci-el/$listingId': typeof IkinciElListingIdRoute
+  '/ikinci-el/yeni': typeof IkinciElYeniRoute
+  '/is-ilani/$jobId': typeof IsIlaniJobIdRoute
+  '/is-ilani/yeni': typeof IsIlaniYeniRoute
   '/kategori/$categoryId': typeof KategoriCategoryIdRoute
   '/konu/$threadId': typeof KonuThreadIdRoute
+  '/ikinci-el/': typeof IkinciElIndexRoute
+  '/is-ilani/': typeof IsIlaniIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
@@ -88,8 +142,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/yeni-konu'
     | '/yeni-mesajlar'
+    | '/ikinci-el/$listingId'
+    | '/ikinci-el/yeni'
+    | '/is-ilani/$jobId'
+    | '/is-ilani/yeni'
     | '/kategori/$categoryId'
     | '/konu/$threadId'
+    | '/ikinci-el/'
+    | '/is-ilani/'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -97,8 +157,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/yeni-konu'
     | '/yeni-mesajlar'
+    | '/ikinci-el/$listingId'
+    | '/ikinci-el/yeni'
+    | '/is-ilani/$jobId'
+    | '/is-ilani/yeni'
     | '/kategori/$categoryId'
     | '/konu/$threadId'
+    | '/ikinci-el'
+    | '/is-ilani'
     | '/api/auth/$'
   id:
     | '__root__'
@@ -106,8 +172,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/yeni-konu'
     | '/yeni-mesajlar'
+    | '/ikinci-el/$listingId'
+    | '/ikinci-el/yeni'
+    | '/is-ilani/$jobId'
+    | '/is-ilani/yeni'
     | '/kategori/$categoryId'
     | '/konu/$threadId'
+    | '/ikinci-el/'
+    | '/is-ilani/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
@@ -116,8 +188,14 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   YeniKonuRoute: typeof YeniKonuRoute
   YeniMesajlarRoute: typeof YeniMesajlarRoute
+  IkinciElListingIdRoute: typeof IkinciElListingIdRoute
+  IkinciElYeniRoute: typeof IkinciElYeniRoute
+  IsIlaniJobIdRoute: typeof IsIlaniJobIdRoute
+  IsIlaniYeniRoute: typeof IsIlaniYeniRoute
   KategoriCategoryIdRoute: typeof KategoriCategoryIdRoute
   KonuThreadIdRoute: typeof KonuThreadIdRoute
+  IkinciElIndexRoute: typeof IkinciElIndexRoute
+  IsIlaniIndexRoute: typeof IsIlaniIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -151,6 +229,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof YeniMesajlarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ikinci-el/': {
+      id: '/ikinci-el/'
+      path: '/ikinci-el'
+      fullPath: '/ikinci-el/'
+      preLoaderRoute: typeof IkinciElIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ikinci-el/$listingId': {
+      id: '/ikinci-el/$listingId'
+      path: '/ikinci-el/$listingId'
+      fullPath: '/ikinci-el/$listingId'
+      preLoaderRoute: typeof IkinciElListingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ikinci-el/yeni': {
+      id: '/ikinci-el/yeni'
+      path: '/ikinci-el/yeni'
+      fullPath: '/ikinci-el/yeni'
+      preLoaderRoute: typeof IkinciElYeniRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/is-ilani/': {
+      id: '/is-ilani/'
+      path: '/is-ilani'
+      fullPath: '/is-ilani/'
+      preLoaderRoute: typeof IsIlaniIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/is-ilani/$jobId': {
+      id: '/is-ilani/$jobId'
+      path: '/is-ilani/$jobId'
+      fullPath: '/is-ilani/$jobId'
+      preLoaderRoute: typeof IsIlaniJobIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/is-ilani/yeni': {
+      id: '/is-ilani/yeni'
+      path: '/is-ilani/yeni'
+      fullPath: '/is-ilani/yeni'
+      preLoaderRoute: typeof IsIlaniYeniRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/kategori/$categoryId': {
       id: '/kategori/$categoryId'
       path: '/kategori/$categoryId'
@@ -180,8 +300,14 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   YeniKonuRoute: YeniKonuRoute,
   YeniMesajlarRoute: YeniMesajlarRoute,
+  IkinciElListingIdRoute: IkinciElListingIdRoute,
+  IkinciElYeniRoute: IkinciElYeniRoute,
+  IsIlaniJobIdRoute: IsIlaniJobIdRoute,
+  IsIlaniYeniRoute: IsIlaniYeniRoute,
   KategoriCategoryIdRoute: KategoriCategoryIdRoute,
   KonuThreadIdRoute: KonuThreadIdRoute,
+  IkinciElIndexRoute: IkinciElIndexRoute,
+  IsIlaniIndexRoute: IsIlaniIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

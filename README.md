@@ -1,22 +1,20 @@
 # KonyaGo Arşiv
 
-**konyagoarsiv.org** için forum arayüzü — [Donanım Arşivi Forum](https://forum.donanimarsivi.com) düzeninden esinlenen, Konya odaklı dijital arşiv.
+**konyagoarsiv.org** — Konya odaklı topluluk: forum, ikinci el ilan panosu ve iş panosu.
 
 ## Özellikler
 
-- Kategori grupları (Gezi, Mutfak, Tarih, Semtler, Rotalar, …)
-- Konu listesi (sabit / sıcak rozetleri, cevap & hit)
-- Konu detayı + cevap yazma
-- Yeni konu açma
-- Yan menü: sıcak konular, son içerikler, çevrim içi, istatistikler
-- Arama, mobil uyumlu layout
-- Demo veriler (tarayıcıda localStorage ile kalıcı yeni konu/cevap)
+- Forum: kategori grupları, konular, cevaplar
+- **İkinci el pano:** fazla ürün ilanı; sitede ödeme yok, alıcı-satıcı dışarıda anlaşır
+- **İş panosu:** işveren ve iş arayan ilanları; görüşme site dışında
+- Yan menü, arama, mobil uyumlu arayüz
+- Demo veriler (tarayıcıda localStorage ile kalıcı yeni ilan/konu)
 
 ## Geliştirme
 
 ```bash
 npm install
-npm run dev      # 0.0.0.0:8080
+npm run dev
 npm run build
 npm run typecheck
 ```
@@ -25,9 +23,4 @@ Stack: React 19, TanStack Start, Tailwind v4, Zustand.
 
 ## Domain
 
-Hedef site: **https://konyagoarsiv.org**  
-İlgili proje: [konyago.com.tr](https://konyago.com.tr)
-
-## Not
-
-Bu depo demo arayüz + örnek içerik içerir. Canlı üretim forumu için backend (XenForo / Discourse / özel API) bağlanmalıdır.
+https://konyagoarsiv.org · [konyago.com.tr](https://konyago.com.tr)
