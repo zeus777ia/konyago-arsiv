@@ -1,0 +1,129 @@
+import { Link } from "@tanstack/react-router";
+import { Flame, Users } from "lucide-react";
+import { STATS, getCategory, hotThreads } from "@/lib/forum/data";
+import { displayName } from "@/lib/forum/names";
+import { useForumStore } from "@/lib/forum/store";
+import { formatCount, formatRelative } from "@/lib/utils";
+
+export function ForumSidebar() {
+  const threads = useForumStore((s) => s.threads);
+  const names = useForumStore((s) => s.names);
+
+  const extraHot = [...threads]
+    .filter((t) => t.hot || t.replies > 40)
+    .sort((a, b) => b.replies - a.replies)
+    .slice(0, 5);
+  const seedHot = hotThreads(5);
+  const list = (extraHot.length ? extraHot : seedHot).slice(0, 5);
+
+  const latest = [...threads]
+    .sort((a, b) => +new Date(b.lastPostAt) - +new Date(a.lastPostAt))
+    .slice(0, 6);
+
+  return (
+    <aside className="space-y-4">
+      <Widget title="Sıcak konular" icon={<Flame className="size-3.5 text-accent" />}>
+        <ul className="divide-y divide-border">
+          {list.map((t) => {
+            const cat = getCategory(t.categoryId);
+            return (
+              <li key={t.id} className="py-2.5 first:pt-0 last:pb-0">
+                <Link
+                  to="/konu/$threadId"
+                  params={{ threadId: t.id }}
+                  className="block text-sm font-medium text-fg hover:text-primary"
+                >
+                  {t.title}
+                </Link>
+                <p className="mt-0.5 text-[11px] text-subtle">
+                  {cat?.name} · {t.replies} cevap
+                </p>
+              </li>
+            );
+          })}
+        </ul>
+      </Widget>
+
+      <Widget title="En son içerikler">
+        <ul className="divide-y divide-border">
+          {latest.map((t) => (
+            <li key={t.id} className="py-2.5 first:pt-0 last:pb-0">
+              <Link
+                to="/konu/$threadId"
+                params={{ threadId: t.id }}
+                className="block text-sm text-fg hover:text-primary"
+              >
+                {t.title}
+              </Link>
+              <p className="mt-0.5 text-[11px] text-subtle">
+                {formatRelative(t.lastPostAt)} ·{" "}
+                {displayName(t.lastPosterId, names)}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </Widget>
+
+      <Widget title="Çevrim içi üyeler" icon={<Users className="size-3.5 text-online" />}>
+        <p className="text-sm text-muted">
+          Toplam:{" "}
+          <strong className="font-semibold text-fg">{STATS.online.total}</strong>
+          {" "}
+          (üye: {STATS.online.members}, ziyaretçi: {STATS.online.guests})
+        </p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {["MevlanaSever", "SilleGezgini", "EtliEkmekTR", "FotoKonya", "MeramRotası"].map(
+            (n) => (
+              <span
+                key={n}
+                className="rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-medium text-primary"
+              >
+                {n}
+              </span>
+            ),
+          )}
+        </div>
+      </Widget>
+
+      <Widget title="Forum istatistikleri">
+        <dl className="grid grid-cols-2 gap-2 text-sm">
+          <Stat label="Konular" value={formatCount(STATS.topics)} />
+          <Stat label="Mesajlar" value={formatCount(STATS.posts)} />
+          <Stat label="Üyeler" value={formatCount(STATS.members)} />
+          <Stat label="Son üye" value={STATS.newestMember} />
+        </dl>
+      </Widget>
+    </aside>
+  );
+}
+
+function Widget({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="overflow-hidden rounded-lg border border-border bg-surface shadow-card">
+      <header className="flex items-center gap-1.5 border-b border-border bg-bg-elevated px-3 py-2">
+        {icon}
+        <h2 className="text-xs font-semibold tracking-wide text-fg uppercase">
+          {title}
+        </h2>
+      </header>
+      <div className="px-3 py-3">{children}</div>
+    </section>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md bg-bg-elevated px-2.5 py-2">
+      <dt className="text-[11px] text-subtle">{label}</dt>
+      <dd className="truncate text-sm font-semibold text-fg">{value}</dd>
+    </div>
+  );
+}
