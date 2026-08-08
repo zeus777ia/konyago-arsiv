@@ -46,7 +46,12 @@ export function Avatar({
   const src =
     imageUrl !== undefined ? imageUrl ?? undefined : getMemberAvatarByName(name);
   const activity = getMemberActivityByName(name);
-  const frame = getFrame(normalizeActivity(activity));
+  const activityFrame = getFrame(normalizeActivity(activity));
+
+  /** Kurucu: her zaman mavi alev çerçevesi; diğerleri aktiflik çerçevesi */
+  const useFounderFlame = showFrame && founder;
+  const useActivityFrame =
+    showFrame && !founder && activityFrame.id !== "none";
 
   const dim =
     size === "sm"
@@ -57,8 +62,17 @@ export function Avatar({
           ? "size-12 text-sm"
           : "size-16 text-base";
 
-  const framePad =
-    showFrame && frame.id !== "none"
+  const flameShell =
+    size === "sm"
+      ? "size-9 p-[3px]"
+      : size === "md"
+        ? "size-11 p-[3px]"
+        : size === "lg"
+          ? "size-[3.75rem] p-[4px]"
+          : "size-[5rem] p-[5px]";
+
+  const activityPad =
+    useActivityFrame
       ? size === "sm"
         ? "p-[2px]"
         : size === "md"
@@ -66,7 +80,7 @@ export function Avatar({
           : "p-[3px]"
       : "";
 
-  const inner = src ? (
+  const face = src ? (
     <img
       src={src}
       alt=""
@@ -83,20 +97,42 @@ export function Avatar({
     </span>
   );
 
+  if (useFounderFlame) {
+    return (
+      <span
+        className={cn(
+          "founder-flame-frame relative inline-flex shrink-0 items-center justify-center",
+          flameShell,
+          className,
+        )}
+        aria-hidden
+        title={`${name} · Kurucu · Mavi alev çerçevesi`}
+      >
+        <span className="founder-flame-ring" aria-hidden />
+        <span className="founder-flame-glow" aria-hidden />
+        <span className="relative z-[1] block h-full w-full overflow-hidden rounded-full bg-surface shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)]">
+          {face}
+        </span>
+      </span>
+    );
+  }
+
   return (
     <span
       className={cn(
         "inline-flex shrink-0 rounded-full",
         dim,
-        showFrame && frame.id !== "none" && frame.ringClass,
-        framePad,
+        useActivityFrame && activityFrame.ringClass,
+        activityPad,
         className,
       )}
       aria-hidden
-      title={frame.id !== "none" ? `${name} · ${frame.label}` : name}
+      title={
+        useActivityFrame ? `${name} · ${activityFrame.label}` : name
+      }
     >
       <span className="block h-full w-full overflow-hidden rounded-full bg-surface">
-        {inner}
+        {face}
       </span>
     </span>
   );
