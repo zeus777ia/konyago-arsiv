@@ -8,18 +8,18 @@ import { HOME_OFFICIAL_HIGHLIGHTS, RULES_UPDATED } from "@/lib/forum/rules-conte
 export function OfficialSpotlight() {
   return (
     <section
-      className="official-spotlight relative overflow-hidden rounded-xl border-2 border-primary/40 shadow-card"
+      className="official-spotlight relative overflow-hidden rounded-xl border border-primary/30 shadow-card"
       aria-label="Duyurular ve Kurallar"
     >
       <div className="official-spotlight-glow pointer-events-none absolute inset-0" />
 
-      <header className="relative flex flex-wrap items-center gap-2 border-b border-white/15 bg-[#0b3d32] px-3 py-2.5 sm:px-4">
-        <span className="official-pulse-dot size-2.5 rounded-full bg-emerald-300" />
-        <Megaphone className="size-4 text-emerald-200" />
-        <h2 className="official-blink-title text-sm font-bold tracking-wide text-white uppercase sm:text-base">
+      <header className="relative flex flex-wrap items-center gap-2 border-b border-white/10 bg-header px-3 py-2.5 sm:px-4">
+        <span className="official-pulse-dot size-2.5 rounded-full bg-emerald-300/90" />
+        <Megaphone className="size-4 text-emerald-200/90" />
+        <h2 className="official-blink-title font-display text-sm font-semibold tracking-wide text-header-fg sm:text-base">
           Duyurular & Kurallar
         </h2>
-        <span className="official-badge-blink ml-auto rounded px-2 py-0.5 text-[10px] font-extrabold tracking-wider text-[#0b3d32]">
+        <span className="official-badge-blink ml-auto rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wider text-header">
           RESMÎ
         </span>
       </header>
@@ -28,7 +28,7 @@ export function OfficialSpotlight() {
         <Link
           to="/konu/$threadId"
           params={{ threadId: "official_announcement" }}
-          className="group border-b border-border/80 bg-surface/95 p-4 transition-colors hover:bg-primary-soft/40 md:border-r md:border-b-0"
+          className="group border-b border-border/80 bg-surface/90 p-4 transition-colors hover:bg-primary-soft/50 md:border-r md:border-b-0"
         >
           <div className="mb-2 flex items-center gap-2">
             <Sparkles className="size-4 text-accent official-icon-pulse" />
@@ -51,7 +51,7 @@ export function OfficialSpotlight() {
         <Link
           to="/konu/$threadId"
           params={{ threadId: "official_rules" }}
-          className="group bg-surface/95 p-4 transition-colors hover:bg-primary-soft/40"
+          className="group bg-surface/90 p-4 transition-colors hover:bg-primary-soft/50"
         >
           <div className="mb-2 flex items-center gap-2">
             <Scale className="size-4 text-primary official-icon-pulse" />
@@ -84,25 +84,16 @@ export function OfficialSpotlight() {
         ))}
       </ul>
 
-      <div className="relative flex flex-wrap gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4">
+      <div className="relative flex flex-wrap items-center justify-between gap-2 border-t border-border bg-surface/80 px-3 py-2.5 sm:px-4">
+        <p className="text-[11px] text-muted">
+          Bu bölümde yalnızca resmî duyuru ve kurallar yer alır; üye konusu
+          açılamaz.
+        </p>
         <Link
           to="/kurallar"
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-fg hover:bg-primary-hover"
+          className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-fg shadow-sm transition-colors hover:bg-primary-hover"
         >
-          Tam kural metni
-        </Link>
-        <Link
-          to="/kategori/$categoryId"
-          params={{ categoryId: "duyurular" }}
-          className="rounded-md border border-border bg-bg-elevated px-3 py-1.5 text-xs font-medium text-fg hover:bg-surface-hover"
-        >
-          Tüm resmî konular
-        </Link>
-        <Link
-          to="/yasal-uyari"
-          className="rounded-md px-3 py-1.5 text-xs font-medium text-muted hover:text-primary"
-        >
-          Yasal uyarı
+          Tüm kurallar
         </Link>
       </div>
     </section>

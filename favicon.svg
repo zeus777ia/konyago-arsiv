@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="7" fill="#0b3d32"/>
-  <path d="M8 22V10h3.2c2.6 0 4.2 1.4 4.2 3.6 0 1.5-.8 2.7-2.1 3.2L16.8 22h-3.1l-3-4.8H11V22H8zm3-7.2h.8c1.1 0 1.8-.6 1.8-1.5S12.9 12 11.8 12H11v2.8zM18.2 22l3.4-12h3.1L28 22h-3.1l-.6-2.2h-3.4L20.3 22h-2.1zm4.1-4.6h2.3l-1.1-4-1.2 4z" fill="#ecf7f3"/>
+  <rect width="32" height="32" rx="8" fill="#1a2e28"/>
+  <rect x="1" y="1" width="30" height="30" rx="7" stroke="#2a8f72" stroke-opacity="0.35"/>
+  <text x="16" y="21.5" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="#eef4f1">KA</text>
 </svg>

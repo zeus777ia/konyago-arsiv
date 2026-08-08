@@ -4,8 +4,8 @@
   "description": "Forum, ikinci el ve iş panosu — konyagoarsiv.org",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f6f4ef",
-  "theme_color": "#0b3d32",
+  "background_color": "#f0ebe3",
+  "theme_color": "#1a2e28",
   "lang": "tr",
   "icons": [
     {

@@ -65,7 +65,7 @@ export function ForumShell({
     <div className="min-h-dvh bg-bg text-fg">
       <SyncProvider />
       <SeedOfficialForum />
-      <div className="bg-header text-header-fg shadow-header">
+      <div className="site-header text-header-fg">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-3 py-2.5 sm:px-4">
           <button
             type="button"
@@ -77,10 +77,10 @@ export function ForumShell({
           </button>
 
           <Link to="/" className="flex min-w-0 items-center gap-2.5">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-fg">
+            <span className="logo-mark flex size-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-primary-fg">
               KA
             </span>
-            <span className="truncate text-sm font-semibold tracking-tight sm:text-base">
+            <span className="font-display truncate text-sm font-semibold tracking-tight sm:text-base">
               {SITE.name}
             </span>
           </Link>

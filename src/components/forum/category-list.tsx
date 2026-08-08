@@ -231,7 +231,7 @@ export function LatestThreadsTable({
                             </span>
                           )}
                           {t.status === "pending" && (
-                            <span className="mt-0.5 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
+                            <span className="mt-0.5 rounded bg-accent-soft px-1.5 py-0.5 text-[10px] font-semibold text-accent">
                               İNCELEME
                             </span>
                           )}
