@@ -6,6 +6,7 @@ import { useCurrentUser, useCurrentUserState } from "./use-current-user";
 import { logoutMember } from "@/lib/members/store";
 import { FOUNDER_TITLE, isFounder } from "@/lib/staff/founder";
 import { UserName } from "@/components/forum/user-name";
+import { Avatar } from "@/components/forum/avatar";
 
 export const SIGN_IN_PATH = "/login";
 
@@ -55,23 +56,12 @@ export function UserButton() {
         className="flex min-w-0 items-center gap-2 rounded-md px-1 py-0.5 hover:bg-white/10"
         title="Hesap yönetimi"
       >
-        {user.profileImageUrl ? (
-          <img
-            src={user.profileImageUrl}
-            alt=""
-            className="h-8 w-8 rounded-full object-cover"
-          />
-        ) : (
-          <span
-            className={
-              founder
-                ? "founder-avatar grid h-8 w-8 place-items-center rounded-full text-xs font-semibold"
-                : "grid h-8 w-8 place-items-center rounded-full bg-white/15 text-xs font-semibold text-header-fg"
-            }
-          >
-            {founder ? "★" : label.charAt(0).toUpperCase()}
-          </span>
-        )}
+        <Avatar
+          name={label}
+          size="sm"
+          imageUrl={user.profileImageUrl}
+          className="ring-1 ring-white/15"
+        />
         <div className="hidden min-w-0 flex-col sm:flex">
           <UserName
             name={label}

@@ -5,6 +5,12 @@ import {
   sendAppEmail,
   welcomeEmail,
 } from "@/lib/email/send";
+import {
+  DEFAULT_ACTIVITY,
+  applyActivityTick,
+  normalizeActivity,
+  type MemberActivity,
+} from "@/lib/members/ranks";
 
 export type MemberPrefs = {
   /** E-posta panoda gösterilsin mi */
@@ -33,6 +39,9 @@ export type Member = {
   createdAt: string;
   updatedAt?: string;
   lastLoginAt?: string;
+  /** base64 data URL profil fotoğrafı */
+  avatarUrl?: string;
+  activity: MemberActivity;
   profile: MemberProfile;
   prefs: MemberPrefs;
 };
@@ -71,6 +80,7 @@ type MembersState = {
   logout: () => void;
   updateProfile: (input: {
     displayName?: string;
+    avatarUrl?: string | null;
     profile?: Partial<MemberProfile>;
     prefs?: Partial<MemberPrefs>;
   }) => { ok: true } | { ok: false; error: string };
@@ -119,6 +129,10 @@ function normalizeMember(raw: Partial<Member> & {
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
     lastLoginAt: raw.lastLoginAt,
+    avatarUrl: raw.avatarUrl,
+    activity: normalizeActivity(
+      (raw as Partial<Member>).activity ?? DEFAULT_ACTIVITY,
+    ),
     profile: { ...DEFAULT_PROFILE, ...(raw.profile ?? {}) },
     prefs: { ...DEFAULT_PREFS, ...(raw.prefs ?? {}) },
   };
@@ -176,6 +190,12 @@ export const useMembersStore = create<MembersState>()(
               ...nm,
               displayName: name ?? nm.displayName,
               updatedAt: now,
+              avatarUrl:
+                input.avatarUrl === null
+                  ? undefined
+                  : input.avatarUrl !== undefined
+                    ? input.avatarUrl
+                    : nm.avatarUrl,
               profile: {
                 ...nm.profile,
                 ...(input.profile ?? {}),
@@ -200,7 +220,7 @@ export const useMembersStore = create<MembersState>()(
     }),
     {
       name: "konyago-arsiv-members-v3",
-      version: 4,
+      version: 5,
       migrate: (persisted, fromVersion) => {
         const p = (persisted ?? {}) as {
           members?: Partial<Member>[];
@@ -275,6 +295,7 @@ export async function registerMember(input: {
     createdAt: now,
     updatedAt: now,
     lastLoginAt: now,
+    activity: { ...DEFAULT_ACTIVITY },
     profile: { ...DEFAULT_PROFILE },
     prefs: { ...DEFAULT_PREFS },
   };
@@ -538,4 +559,43 @@ export async function resetPasswordWithCode(input: {
     session: null,
   });
   return { ok: true };
+}
+
+
+export function tickMemberActivity(minutes = 1) {
+  const s = useMembersStore.getState().session;
+  if (!s) return;
+  const now = new Date();
+  useMembersStore.setState({
+    members: useMembersStore.getState().members.map((m) => {
+      if (m.id !== s.memberId) return m;
+      const nm = normalizeMember(m);
+      return {
+        ...nm,
+        activity: applyActivityTick(nm.activity, minutes, now),
+        updatedAt: now.toISOString(),
+      };
+    }),
+  });
+}
+
+export function setMemberAvatar(
+  dataUrl: string | null,
+): { ok: true } | { ok: false; error: string } {
+  return useMembersStore.getState().updateProfile({ avatarUrl: dataUrl });
+}
+
+export function getMemberByName(name: string): Member | null {
+  const m = useMembersStore
+    .getState()
+    .members.find((x) => x.displayName === name);
+  return m ? normalizeMember(m) : null;
+}
+
+export function getMemberAvatarByName(name: string): string | undefined {
+  return getMemberByName(name)?.avatarUrl;
+}
+
+export function getMemberActivityByName(name: string): MemberActivity {
+  return getMemberByName(name)?.activity ?? { ...DEFAULT_ACTIVITY };
 }

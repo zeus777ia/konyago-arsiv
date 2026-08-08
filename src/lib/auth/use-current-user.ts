@@ -27,7 +27,6 @@ export type CurrentUserState = {
 
 function subscribeMembers(cb: () => void) {
   const unsubStore = useMembersStore.subscribe(cb);
-  // Re-notify when persist finishes hydrating (session may appear)
   const unsubHydrate = useMembersStore.persist.onFinishHydration(() => cb());
   return () => {
     unsubStore();
@@ -35,14 +34,25 @@ function subscribeMembers(cb: () => void) {
   };
 }
 
-function getMemberSession() {
-  return useMembersStore.getState().session;
+/** String snapshot so avatar/activity changes re-render consumers */
+function getMemberUserSnapshot(): string {
+  const s = useMembersStore.getState().session;
+  if (!s) return "null";
+  const m = useMembersStore
+    .getState()
+    .members.find((x) => x.id === s.memberId);
+  return [
+    s.memberId,
+    s.displayName,
+    s.email,
+    m?.avatarUrl?.length ?? 0,
+    m?.avatarUrl?.slice(-24) ?? "",
+    m?.activity?.totalMinutes ?? 0,
+    m?.updatedAt ?? "",
+  ].join("|");
 }
 
 function subscribeHydrated(cb: () => void) {
-  if (useMembersStore.persist.hasHydrated()) {
-    // already done
-  }
   const unsub = useMembersStore.persist.onFinishHydration(() => cb());
   return () => {
     unsub();
@@ -67,10 +77,10 @@ export function useMembersHydrated(): boolean {
  */
 export function useCurrentUserState(): CurrentUserState {
   const hydrated = useMembersHydrated();
-  const session = useSyncExternalStore(
+  const memberSnap = useSyncExternalStore(
     subscribeMembers,
-    getMemberSession,
-    () => null,
+    getMemberUserSnapshot,
+    () => "null",
   );
 
   const ba = authEnabled
@@ -82,13 +92,17 @@ export function useCurrentUserState(): CurrentUserState {
     return { user: null, isPending: true };
   }
 
-  if (session) {
+  if (memberSnap !== "null") {
+    const s = useMembersStore.getState().session!;
+    const member = useMembersStore
+      .getState()
+      .members.find((m) => m.id === s.memberId);
     return {
       user: {
-        id: session.memberId,
-        displayName: session.displayName,
-        primaryEmail: session.email,
-        profileImageUrl: null,
+        id: s.memberId,
+        displayName: s.displayName,
+        primaryEmail: s.email,
+        profileImageUrl: member?.avatarUrl ?? null,
         isDevFallback: false,
         isLocalMember: true,
       },

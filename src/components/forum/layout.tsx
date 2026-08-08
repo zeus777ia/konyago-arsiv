@@ -25,6 +25,7 @@ import { useReportsStore } from "@/lib/reports/store";
 import { NotificationBell } from "@/components/forum/notification-bell";
 import { FounderBanner } from "@/components/forum/founder-banner";
 import { SyncProvider, SyncStatusPill } from "@/components/forum/sync-provider";
+import { ActivityTracker } from "@/components/forum/activity-tracker";
 
 export function ForumShell({
   children,
@@ -64,6 +65,7 @@ export function ForumShell({
   return (
     <div className="min-h-dvh bg-bg text-fg">
       <SyncProvider />
+      <ActivityTracker />
       <SeedOfficialForum />
       <div className="site-header text-header-fg">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-3 py-2.5 sm:px-4">

@@ -15,6 +15,14 @@ import {
 import { isFounderName } from "@/lib/staff/founder";
 import { useMembersHydrated } from "@/lib/auth/use-current-user";
 import { formatRelative } from "@/lib/utils";
+import { RankBadge, FrameBadge } from "@/components/forum/member-badges";
+import {
+  formatActiveDuration,
+  getFrame,
+  getRank,
+  normalizeActivity,
+} from "@/lib/members/ranks";
+
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/uye/$name")({
@@ -101,9 +109,26 @@ function PublicProfilePage() {
       <div className="mx-auto max-w-2xl space-y-4">
         <section className="rounded-xl border border-border bg-surface p-5 shadow-card">
           <div className="flex flex-wrap items-start gap-4">
-            <Avatar name={name} size="lg" />
+            <Avatar name={name} size="xl" imageUrl={member?.avatarUrl} />
             <div className="min-w-0 flex-1">
               <UserName name={name} size="lg" link={false} />
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                <RankBadge activity={member?.activity} />
+                <FrameBadge activity={member?.activity} />
+              </div>
+              {member?.activity && (
+                <p className="mt-1.5 text-[11px] text-subtle">
+                  Aktif süre:{" "}
+                  {formatActiveDuration(
+                    normalizeActivity(member.activity).totalMinutes,
+                  )}
+                  {" · "}
+                  {getRank(normalizeActivity(member.activity).totalMinutes).label}
+                  {getFrame(normalizeActivity(member.activity)).id !== "none"
+                    ? ` · ${getFrame(normalizeActivity(member.activity)).label}`
+                    : ""}
+                </p>
+              )}
               {profile.bio && (
                 <p className="mt-2 text-sm leading-relaxed text-muted">
                   {profile.bio}
