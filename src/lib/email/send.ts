@@ -1,8 +1,9 @@
 /**
- * Uygulama e-postaları — görünen gönderen: info@konyago.com.tr
+ * App emails — sender identity: info@konyago.com.tr
  *
- * 1) EmailJS (VITE_EMAILJS_*) yapılandırılmışsa onu kullanır.
- * 2) Yoksa FormSubmit üzerinden alıcıya iletir (_replyto = info@konyago.com.tr).
+ * 1) EmailJS when VITE_EMAILJS_* is set (custom SMTP / domain).
+ * 2) Otherwise FormSubmit to the user, with _replyto = info@konyago.com.tr
+ *    (recipient may need to confirm the first FormSubmit activation mail).
  */
 
 export const FROM_EMAIL = "info@konyago.com.tr";
@@ -31,11 +32,13 @@ function env(key: string): string | undefined {
 }
 
 function escapeHtml(s: string): string {
-  return s
-    .replaceAll("&", "&")
-    .replaceAll("<", "<")
-    .replaceAll(">", ">")
-    .replaceAll('"', """);
+  const map: Record<string, string> = {
+    "&": "&" + "amp;",
+    "<": "&" + "lt;",
+    ">": "&" + "gt;",
+    '"': "&" + "quot;",
+  };
+  return s.replace(/[&<>"]/g, (ch) => map[ch] ?? ch);
 }
 
 async function sendViaEmailJS(payload: MailPayload): Promise<MailResult | null> {
@@ -90,7 +93,14 @@ async function sendViaFormSubmit(payload: MailPayload): Promise<MailResult> {
           _subject: payload.subject,
           _template: "table",
           _captcha: "false",
-          message: `${payload.text}\n\n---\nGönderen: ${FROM_NAME} <${FROM_EMAIL}>\nSite: ${SITE_URL}`,
+          message:
+            payload.text +
+            "\n\n---\nGönderen: " +
+            FROM_NAME +
+            " <" +
+            FROM_EMAIL +
+            ">\nSite: " +
+            SITE_URL,
         }),
       },
     );
@@ -123,24 +133,46 @@ export function welcomeEmail(input: {
   displayName: string;
   email: string;
 }): MailPayload {
-  const subject = "KonyaGo Arşiv’e hoş geldiniz";
-  const text = `Merhaba ${input.displayName},
-
-KonyaGo Arşiv topluluğuna katıldığın için teşekkürler.
-
-Hesabın oluşturuldu.
-E-posta: ${input.email}
-Site: ${SITE_URL}
-
-Bu platform bağımsız bir topluluk arşividir; resmi bir kamu kurumu veya belediye sitesi değildir.
-
-İyi forumlar dileriz.
-${FROM_NAME}
-${FROM_EMAIL}`;
+  const subject = "KonyaGo Arşiv'e hoş geldiniz";
+  const text = [
+    "Merhaba " + input.displayName + ",",
+    "",
+    "KonyaGo Arşiv topluluğuna katıldığın için teşekkürler.",
+    "",
+    "Hesabın oluşturuldu.",
+    "E-posta: " + input.email,
+    "Site: " + SITE_URL,
+    "",
+    "Bu platform bağımsız bir topluluk arşividir; resmi bir kamu kurumu veya belediye sitesi değildir.",
+    "",
+    "İyi forumlar dileriz.",
+    FROM_NAME,
+    FROM_EMAIL,
+  ].join("\n");
 
   const name = escapeHtml(input.displayName);
   const mail = escapeHtml(input.email);
-  const html = `<div style="font-family:system-ui,sans-serif;max-width:560px;line-height:1.5;color:#1a1a1a"><h2 style="color:#0f6b52;margin:0 0 12px">Aramıza hoş geldin, ${name}!</h2><p>KonyaGo Arşiv hesabın hazır. Forum, ikinci el ve iş panosunu kullanmaya başlayabilirsin.</p><p><strong>E-posta:</strong> ${mail}<br/><strong>Site:</strong> <a href="${SITE_URL}">${SITE_URL}</a></p><p style="font-size:13px;color:#555">Bu platform bağımsız bir topluluk arşividir; resmi bir kamu kurumu veya belediye sitesi değildir.</p><p style="margin-top:24px">İyi forumlar,<br/><strong>${FROM_NAME}</strong><br/><a href="mailto:${FROM_EMAIL}">${FROM_EMAIL}</a></p></div>`;
+  const html =
+    '<div style="font-family:system-ui,sans-serif;max-width:560px;line-height:1.5;color:#1a1a1a">' +
+    '<h2 style="color:#0f6b52;margin:0 0 12px">Aramıza hoş geldin, ' +
+    name +
+    "!</h2>" +
+    "<p>KonyaGo Arşiv hesabın hazır. Forum, ikinci el ve iş panosunu kullanmaya başlayabilirsin.</p>" +
+    "<p><strong>E-posta:</strong> " +
+    mail +
+    "<br/><strong>Site:</strong> <a href=\"" +
+    SITE_URL +
+    '">' +
+    SITE_URL +
+    "</a></p>" +
+    '<p style="font-size:13px;color:#555">Bu platform bağımsız bir topluluk arşividir; resmi bir kamu kurumu veya belediye sitesi değildir.</p>' +
+    '<p style="margin-top:24px">İyi forumlar,<br/><strong>' +
+    FROM_NAME +
+    "</strong><br/><a href=\"mailto:" +
+    FROM_EMAIL +
+    '">' +
+    FROM_EMAIL +
+    "</a></p></div>";
 
   return { to: input.email, subject, text, html };
 }
@@ -151,22 +183,41 @@ export function resetPasswordEmail(input: {
   code: string;
 }): MailPayload {
   const subject = "Şifre sıfırlama kodu — KonyaGo Arşiv";
-  const text = `Merhaba ${input.displayName},
-
-Şifre sıfırlama talebin alındı.
-
-Doğrulama kodun: ${input.code}
-
-Bu kod 30 dakika geçerlidir. Talebi sen yapmadıysan bu e-postayı yok say.
-
-Giriş: ${SITE_URL}/login
-Destek: ${FROM_EMAIL}
-
-${FROM_NAME}`;
+  const text = [
+    "Merhaba " + input.displayName + ",",
+    "",
+    "Şifre sıfırlama talebin alındı.",
+    "",
+    "Doğrulama kodun: " + input.code,
+    "",
+    "Bu kod 30 dakika geçerlidir. Talebi sen yapmadıysan bu e-postayı yok say.",
+    "",
+    "Giriş: " + SITE_URL + "/login",
+    "Destek: " + FROM_EMAIL,
+    "",
+    FROM_NAME,
+  ].join("\n");
 
   const name = escapeHtml(input.displayName);
   const code = escapeHtml(input.code);
-  const html = `<div style="font-family:system-ui,sans-serif;max-width:560px;line-height:1.5;color:#1a1a1a"><h2 style="color:#0f6b52;margin:0 0 12px">Şifre sıfırlama</h2><p>Merhaba ${name},</p><p>Şifre sıfırlama talebin alındı. Aşağıdaki kodu giriş ekranındaki “Şifremi unuttum” adımına gir:</p><p style="font-size:28px;letter-spacing:6px;font-weight:700;color:#0f6b52;margin:16px 0">${code}</p><p style="font-size:13px;color:#555">Kod 30 dakika geçerlidir. Talebi sen yapmadıysan bu e-postayı yok sayabilirsin.</p><p><a href="${SITE_URL}/login">Giriş paneli</a> · <a href="mailto:${FROM_EMAIL}">${FROM_EMAIL}</a></p></div>`;
+  const html =
+    '<div style="font-family:system-ui,sans-serif;max-width:560px;line-height:1.5;color:#1a1a1a">' +
+    '<h2 style="color:#0f6b52;margin:0 0 12px">Şifre sıfırlama</h2>' +
+    "<p>Merhaba " +
+    name +
+    ",</p>" +
+    "<p>Şifre sıfırlama talebin alındı. Aşağıdaki kodu giriş ekranındaki “Şifremi unuttum” adımına gir:</p>" +
+    '<p style="font-size:28px;letter-spacing:6px;font-weight:700;color:#0f6b52;margin:16px 0">' +
+    code +
+    "</p>" +
+    '<p style="font-size:13px;color:#555">Kod 30 dakika geçerlidir. Talebi sen yapmadıysan bu e-postayı yok sayabilirsin.</p>' +
+    '<p><a href="' +
+    SITE_URL +
+    '/login">Giriş paneli</a> · <a href="mailto:' +
+    FROM_EMAIL +
+    '">' +
+    FROM_EMAIL +
+    "</a></p></div>";
 
   return { to: input.email, subject, text, html };
 }

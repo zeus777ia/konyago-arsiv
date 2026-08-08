@@ -1,0 +1,1 @@
+import{a as e}from"./data-WBa1_ca7.js";function t(t,n){return n[t]?n[t]:e(t)?.name??`Üye`}export{t};

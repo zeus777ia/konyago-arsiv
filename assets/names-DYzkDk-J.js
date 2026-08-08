@@ -1,1 +1,0 @@
-import{m as e}from"./store-qFmjycd2.js";function t(t,n){return n[t]?n[t]:e(t)?.name??`Üye`}export{t};
