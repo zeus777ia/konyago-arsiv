@@ -64,12 +64,12 @@ export function Avatar({
 
   const flameShell =
     size === "sm"
-      ? "size-9 p-[3px]"
+      ? "size-10 p-[4px]"
       : size === "md"
-        ? "size-11 p-[3px]"
+        ? "size-12 p-[5px]"
         : size === "lg"
-          ? "size-[3.75rem] p-[4px]"
-          : "size-[5rem] p-[5px]";
+          ? "size-16 p-[6px]"
+          : "size-[5.5rem] p-[7px]";
 
   const activityPad =
     useActivityFrame
