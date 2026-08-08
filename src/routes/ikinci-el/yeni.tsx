@@ -14,6 +14,7 @@ import {
 } from "@/lib/marketplace/data";
 import { useMarketplaceStore } from "@/lib/marketplace/store";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
+import { moderateContent } from "@/lib/forum/moderation";
 
 export const Route = createFileRoute("/ikinci-el/yeni")({
   component: NewListingPage,
@@ -50,6 +51,11 @@ function NewListingPage() {
       toast.error("Kuralları onaylamanız gerekiyor");
       return;
     }
+    const mod = moderateContent(title, description + " " + priceNote);
+    if (!mod.ok) {
+      toast.error(mod.reason);
+      return;
+    }
     const id = addListing({
       title,
       description,
@@ -79,90 +85,86 @@ function NewListingPage() {
         <span className="text-fg">Yeni ilan</span>
       </nav>
 
-      <div className="mx-auto max-w-2xl">
-        <h1 className="text-xl font-semibold tracking-tight">İkinci el ilanı</h1>
-        <div className="mt-3 flex gap-2 rounded-lg border border-accent/25 bg-accent-soft px-3 py-2.5 text-xs leading-relaxed">
+      <div className="mx-auto max-w-2xl space-y-4">
+        <div className="flex gap-2 rounded-lg border border-accent/25 bg-accent-soft px-3 py-2.5 text-xs leading-relaxed">
           <ShieldAlert className="mt-0.5 size-4 shrink-0 text-accent" />
           <p>{MARKETPLACE_NOTICE}</p>
         </div>
 
         <form
           onSubmit={submit}
-          className="mt-5 space-y-4 rounded-xl border border-border bg-surface p-4 shadow-card sm:p-5"
+          className="space-y-4 rounded-lg border border-border bg-surface p-4 shadow-card sm:p-5"
         >
+          <h1 className="text-lg font-semibold">İkinci el ilanı</h1>
           <Field label="Başlık">
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              maxLength={100}
               className={inputCls}
-              placeholder="Örn. Çalışır bisiklet"
+              placeholder="Ürün başlığı"
             />
           </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Kategori">
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value as ListingCategory)}
-                className={inputCls}
-              >
-                {LISTING_CATEGORIES.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Durum">
-              <select
-                value={condition}
-                onChange={(e) => setCondition(e.target.value as ListingCondition)}
-                className={inputCls}
-              >
-                {CONDITIONS.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Semt / bölge">
-              <select
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
-                className={inputCls}
-              >
-                {DISTRICTS.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Fiyat notu (sadece bilgi)">
-              <input
-                value={priceNote}
-                onChange={(e) => setPriceNote(e.target.value)}
-                className={inputCls}
-                placeholder="Örn. 2.000 ₺ / teklif"
-              />
-            </Field>
-          </div>
+          <Field label="Kategori">
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as ListingCategory)}
+              className={inputCls}
+            >
+              {LISTING_CATEGORIES.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Durum">
+            <select
+              value={condition}
+              onChange={(e) => setCondition(e.target.value as ListingCondition)}
+              className={inputCls}
+            >
+              {CONDITIONS.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="İlçe">
+            <select
+              value={district}
+              onChange={(e) => setDistrict(e.target.value)}
+              className={inputCls}
+            >
+              {DISTRICTS.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Fiyat notu">
+            <input
+              value={priceNote}
+              onChange={(e) => setPriceNote(e.target.value)}
+              className={inputCls}
+              placeholder="Örn. 2.500 ₺ / pazarlık"
+            />
+          </Field>
           <Field label="Açıklama">
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={5}
-              className={inputCls}
-              placeholder="Ürünü anlat. Sitede ödeme yok; yüz yüze anlaşın."
+              className={inputCls + " h-auto py-2"}
             />
           </Field>
-          <Field label="İletişim (alıcıya görünecek)">
+          <Field label="İletişim">
             <input
               value={contact}
               onChange={(e) => setContact(e.target.value)}
               className={inputCls}
-              placeholder="Telefon, Telegram, e-posta…"
+              placeholder="Telefon veya kullanıcı adı"
             />
           </Field>
           <label className="flex items-start gap-2 text-xs text-muted">
@@ -173,16 +175,12 @@ function NewListingPage() {
               className="mt-0.5"
             />
             <span>
-              Sitede ödeme / komisyon olmadığını, anlaşma ve teslimatın site
-              dışında kendi sorumluluğumda olacağını kabul ediyorum.
+              Sitede ödeme olmadığını, kuralları ve yasal uyarıyı kabul ediyorum.
             </span>
           </label>
-          <div className="flex flex-wrap justify-end gap-2">
-            <Button type="button" variant="secondary" asChild>
-              <Link to="/ikinci-el">İptal</Link>
-            </Button>
-            <Button type="submit">İlanı yayınla</Button>
-          </div>
+          <Button type="submit" className="w-full">
+            İlanı yayınla
+          </Button>
         </form>
       </div>
     </ForumShell>
@@ -190,7 +188,7 @@ function NewListingPage() {
 }
 
 const inputCls =
-  "h-10 w-full rounded-md border border-border bg-bg-elevated px-3 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15 min-h-10";
+  "h-10 w-full rounded-md border border-border bg-bg-elevated px-3 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15";
 
 function Field({
   label,
@@ -200,11 +198,9 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <label className="mb-1.5 block text-xs font-medium tracking-wide text-muted uppercase">
-        {label}
-      </label>
+    <label className="block space-y-1.5">
+      <span className="text-xs font-medium text-muted">{label}</span>
       {children}
-    </div>
+    </label>
   );
 }

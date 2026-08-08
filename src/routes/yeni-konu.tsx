@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ShieldAlert } from "lucide-react";
 import { useState } from "react";
 import { toast, Toaster } from "sonner";
 import { z } from "zod";
@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/forum/data";
 import { useForumStore } from "@/lib/forum/store";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
+import { isFounder } from "@/lib/staff/founder";
+import { isCategoryLockedForUsers } from "@/lib/forum/moderation";
 
 const searchSchema = z.object({
   kategori: z.string().optional(),
@@ -23,11 +25,20 @@ function NewTopicPage() {
   const navigate = useNavigate();
   const addThread = useForumStore((s) => s.addThread);
   const user = useCurrentUser();
-  const [categoryId, setCategoryId] = useState(
-    kategori && CATEGORIES.some((c) => c.id === kategori)
-      ? kategori
-      : "genel",
+  const founder = isFounder(user);
+
+  const openCategories = CATEGORIES.filter(
+    (c) => founder || !isCategoryLockedForUsers(c.id),
   );
+
+  const defaultCat =
+    kategori && openCategories.some((c) => c.id === kategori)
+      ? kategori
+      : (openCategories.find((c) => c.id === "genel")?.id ??
+        openCategories[0]?.id ??
+        "genel");
+
+  const [categoryId, setCategoryId] = useState(defaultCat);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
@@ -41,14 +52,29 @@ function NewTopicPage() {
       toast.error("Mesaj en az 10 karakter olmalı");
       return;
     }
-    const id = addThread({
+    const res = addThread({
       categoryId,
       title,
       body,
       authorName: user?.displayName ?? "Misafir",
+      asFounder: founder,
     });
-    toast.success("Konu açıldı");
-    void navigate({ to: "/konu/$threadId", params: { threadId: id } });
+    if (!res.ok) {
+      toast.error(res.error);
+      return;
+    }
+    if (res.status === "pending") {
+      toast.message("Konu incelemeye alındı", {
+        description:
+          "Kurucu onayından sonra herkese açık yayınlanır. Kurallara aykırı içerik otomatik reddedilir.",
+      });
+    } else {
+      toast.success("Konu yayınlandı");
+    }
+    void navigate({
+      to: "/konu/$threadId",
+      params: { threadId: res.threadId },
+    });
   };
 
   return (
@@ -64,9 +90,25 @@ function NewTopicPage() {
 
       <div className="mx-auto max-w-2xl">
         <h1 className="mb-1 text-xl font-semibold tracking-tight">Yeni konu aç</h1>
-        <p className="mb-5 text-sm text-muted">
-          KonyaGo Arşiv’e katkı ekleyin. Spam ve reklama izin verilmez.
+        <p className="mb-4 text-sm text-muted">
+          Konular önce incelemeye alınır. +18, küfür, cinsellik, alkol/uyuşturucu
+          ve telif ihlali otomatik engellenir.
         </p>
+
+        <div className="mb-5 flex gap-2 rounded-lg border border-primary/20 bg-primary-soft px-3 py-2.5 text-xs leading-relaxed text-fg">
+          <ShieldAlert className="mt-0.5 size-4 shrink-0 text-primary" />
+          <p>
+            <strong>Duyurular & Kurallar</strong> bölümüne üye konu açamaz.{" "}
+            <Link
+              to="/konu/$threadId"
+              params={{ threadId: "official_rules" }}
+              className="font-medium text-primary underline-offset-2 hover:underline"
+            >
+              Forum kurallarını okuyun
+            </Link>
+            .
+          </p>
+        </div>
 
         <form
           onSubmit={submit}
@@ -81,9 +123,10 @@ function NewTopicPage() {
               onChange={(e) => setCategoryId(e.target.value)}
               className="h-10 w-full rounded-md border border-border bg-bg-elevated px-3 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
             >
-              {CATEGORIES.filter((c) => c.id !== "duyurular").map((c) => (
+              {openCategories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.group} — {c.name}
+                  {c.lockedForUsers ? " (yalnızca kurucu)" : ""}
                 </option>
               ))}
             </select>
@@ -119,7 +162,9 @@ function NewTopicPage() {
             <Button type="button" variant="secondary" asChild>
               <Link to="/">İptal</Link>
             </Button>
-            <Button type="submit">Konuyu yayınla</Button>
+            <Button type="submit">
+              {founder ? "Konuyu yayınla" : "İncelemeye gönder"}
+            </Button>
           </div>
         </form>
       </div>

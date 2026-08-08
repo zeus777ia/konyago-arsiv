@@ -5,6 +5,7 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import {
+  Check,
   ChevronRight,
   Flame,
   Lock,
@@ -12,8 +13,9 @@ import {
   Send,
   Trash2,
   Unlock,
+  X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { ForumShell } from "@/components/forum/layout";
 import { Avatar } from "@/components/forum/avatar";
@@ -42,6 +44,9 @@ function ThreadPage() {
   const togglePin = useForumStore((s) => s.togglePin);
   const toggleLock = useForumStore((s) => s.toggleLock);
   const toggleHot = useForumStore((s) => s.toggleHot);
+  const approveThread = useForumStore((s) => s.approveThread);
+  const rejectThread = useForumStore((s) => s.rejectThread);
+  const bumpViews = useForumStore((s) => s.bumpViews);
   const user = useCurrentUser();
   const founder = isFounder(user);
   const [body, setBody] = useState("");
@@ -56,25 +61,39 @@ function ThreadPage() {
     [posts, threadId],
   );
 
+  useEffect(() => {
+    if (threadId) bumpViews(threadId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [threadId]);
+
   if (!thread) {
+    throw notFound();
+  }
+
+  const isOwner =
+    !!user?.displayName && names[thread.authorId] === user.displayName;
+  const canView =
+    !thread.status ||
+    thread.status === "approved" ||
+    founder ||
+    (thread.status === "pending" && isOwner);
+
+  if (!canView) {
     throw notFound();
   }
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (thread.locked && !founder) {
-      toast.error("Bu konu kilitli");
-      return;
-    }
-    if (!body.trim()) {
-      toast.error("Mesaj boş olamaz");
-      return;
-    }
-    addReply({
+    const res = addReply({
       threadId,
       body: body.trim(),
       authorName: user?.displayName ?? "Misafir",
+      asFounder: founder,
     });
+    if (!res.ok) {
+      toast.error(res.error);
+      return;
+    }
     setBody("");
     toast.success("Cevabınız eklendi");
   };
@@ -102,6 +121,19 @@ function ThreadPage() {
         <span className="line-clamp-1 text-fg">{thread.title}</span>
       </nav>
 
+      {thread.status === "pending" && (
+        <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          Bu konu <strong>incelemede</strong>. Onaylanana kadar herkese açık
+          listelerde görünmez.
+        </div>
+      )}
+      {thread.status === "rejected" && (
+        <div className="mb-3 rounded-lg border border-danger/30 bg-danger/5 px-3 py-2 text-xs text-danger">
+          Bu konu reddedildi
+          {thread.rejectReason ? `: ${thread.rejectReason}` : "."}
+        </div>
+      )}
+
       <header className="mb-4 rounded-lg border border-border bg-surface px-4 py-3 shadow-card">
         <div className="mb-1 flex flex-wrap gap-1.5">
           {thread.pinned && (
@@ -117,6 +149,11 @@ function ThreadPage() {
           {thread.locked && (
             <span className="rounded bg-badge px-1.5 py-0.5 text-[10px] font-semibold text-muted">
               KİLİTLİ
+            </span>
+          )}
+          {thread.status === "pending" && (
+            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
+              İNCELEMEDE
             </span>
           )}
         </div>
@@ -136,6 +173,34 @@ function ThreadPage() {
             <span className="founder-badge mr-1 inline-flex items-center self-center rounded px-1.5 py-0.5 text-[9px] font-extrabold tracking-wider">
               KURUCU YETKİLERİ
             </span>
+            {thread.status === "pending" && (
+              <>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    approveThread(threadId);
+                    toast.success("Onaylandı");
+                  }}
+                >
+                  <Check className="size-3.5" />
+                  Onayla
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  className="text-danger"
+                  onClick={() => {
+                    rejectThread(threadId);
+                    toast.message("Reddedildi");
+                  }}
+                >
+                  <X className="size-3.5" />
+                  Reddet
+                </Button>
+              </>
+            )}
             <Button
               type="button"
               size="sm"
@@ -178,21 +243,23 @@ function ThreadPage() {
               <Flame className="size-3.5" />
               {thread.hot ? "Sıcak kaldır" : "Sıcak yap"}
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              className="border-danger/40 text-danger hover:bg-danger/10"
-              onClick={() => {
-                if (!confirm("Konu ve tüm mesajlar silinsin mi?")) return;
-                deleteThread(threadId);
-                toast.success("Konu silindi");
-                void navigate({ to: "/" });
-              }}
-            >
-              <Trash2 className="size-3.5" />
-              Konuyu sil
-            </Button>
+            {!threadId.startsWith("official_") && (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="border-danger/40 text-danger hover:bg-danger/10"
+                onClick={() => {
+                  if (!confirm("Konu ve tüm mesajlar silinsin mi?")) return;
+                  deleteThread(threadId);
+                  toast.success("Konu silindi");
+                  void navigate({ to: "/" });
+                }}
+              >
+                <Trash2 className="size-3.5" />
+                Konuyu sil
+              </Button>
+            )}
           </div>
         )}
       </header>
@@ -228,7 +295,7 @@ function ThreadPage() {
                     <span>
                       #{idx + 1} · {formatRelative(post.createdAt)}
                     </span>
-                    {founder && (
+                    {founder && !post.id.startsWith("official_") && (
                       <button
                         type="button"
                         className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-danger hover:bg-danger/10"
@@ -251,17 +318,15 @@ function ThreadPage() {
             </article>
           );
         })}
-
-        {!threadPosts.length && (
-          <p className="rounded-lg border border-border bg-surface px-4 py-8 text-center text-sm text-muted">
-            Bu konuda henüz mesaj yok.
-          </p>
-        )}
       </div>
 
       {thread.locked && !founder ? (
         <p className="mt-5 rounded-lg border border-border bg-surface px-4 py-6 text-center text-sm text-muted shadow-card">
           Bu konu kilitli; yeni cevap yazılamaz.
+        </p>
+      ) : thread.status === "pending" && !founder ? (
+        <p className="mt-5 rounded-lg border border-border bg-surface px-4 py-6 text-center text-sm text-muted shadow-card">
+          İncelemedeki konulara henüz cevap yazılamaz.
         </p>
       ) : (
         <form
@@ -273,7 +338,7 @@ function ThreadPage() {
             value={body}
             onChange={(e) => setBody(e.target.value)}
             rows={5}
-            placeholder="Mesajınızı yazın…"
+            placeholder="Mesajınızı yazın… (küfür / +18 / yasadışı içerik engellenir)"
             className="w-full resize-y rounded-md border border-border bg-bg-elevated px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
           />
           <div className="mt-3 flex justify-end">

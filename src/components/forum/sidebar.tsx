@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { Briefcase, Flame, ShoppingBag, Users } from "lucide-react";
-import { getCategory } from "@/lib/forum/data";
+import { Briefcase, Flame, Scale, ShoppingBag, Users } from "lucide-react";
+import { getCategory, isThreadPublic } from "@/lib/forum/data";
 import { displayName } from "@/lib/forum/names";
-import { useForumStore } from "@/lib/forum/store";
+import { filterVisibleThreads, useForumStore } from "@/lib/forum/store";
 import { useMarketplaceStore } from "@/lib/marketplace/store";
 import { useJobsStore } from "@/lib/jobs/store";
 import { useMembersStore } from "@/lib/members/store";
@@ -12,17 +12,26 @@ import { UserName } from "@/components/forum/user-name";
 import { isFounder } from "@/lib/staff/founder";
 
 export function ForumSidebar() {
-  const threads = useForumStore((s) => s.threads);
+  const allThreads = useForumStore((s) => s.threads);
   const posts = useForumStore((s) => s.posts);
   const names = useForumStore((s) => s.names);
   const members = useMembersStore((s) => s.members);
   const currentUser = useCurrentUser();
+  const founder = isFounder(currentUser);
+  const threads = filterVisibleThreads(allThreads, {
+    isFounder: founder,
+    authorName: currentUser?.displayName,
+    names,
+    includePendingOwn: false,
+  }).filter(isThreadPublic);
+
   const marketN = useMarketplaceStore(
     (s) => s.listings.filter((l) => l.status === "aktif").length,
   );
   const jobN = useJobsStore(
     (s) => s.jobs.filter((j) => j.status === "aktif").length,
   );
+  const pendingN = allThreads.filter((t) => t.status === "pending").length;
 
   const hot = [...threads]
     .filter((t) => t.hot || t.replies >= 3)
@@ -40,10 +49,23 @@ export function ForumSidebar() {
 
   const onlineMembers = currentUser ? 1 : 0;
 
+  // İstatistik: yalnızca onaylı konular
+  const approved = allThreads.filter(isThreadPublic);
+  const approvedPosts = posts.filter((p) =>
+    approved.some((t) => t.id === p.threadId),
+  );
+
   return (
     <aside className="space-y-4">
       <Widget title="Hızlı panolar">
         <div className="space-y-2">
+          <Link
+            to="/kurallar"
+            className="flex items-center gap-2 rounded-md bg-bg-elevated px-2.5 py-2 text-sm font-medium text-fg hover:bg-surface-hover"
+          >
+            <Scale className="size-4 text-primary" />
+            Forum kuralları
+          </Link>
           <Link
             to="/ikinci-el"
             className="flex items-center gap-2 rounded-md bg-bg-elevated px-2.5 py-2 text-sm font-medium text-fg hover:bg-surface-hover"
@@ -60,6 +82,15 @@ export function ForumSidebar() {
             İş panosu
             <span className="ml-auto text-[11px] text-subtle">{jobN}</span>
           </Link>
+          {founder && (
+            <Link
+              to="/moderasyon"
+              className="flex items-center gap-2 rounded-md bg-primary-soft px-2.5 py-2 text-sm font-medium text-primary hover:opacity-90"
+            >
+              Moderasyon kuyruğu
+              <span className="ml-auto text-[11px]">{pendingN}</span>
+            </Link>
+          )}
         </div>
       </Widget>
 
@@ -129,23 +160,14 @@ export function ForumSidebar() {
         ) : (
           <p className="mt-1 text-[11px] text-subtle">Giriş yapan üye yok.</p>
         )}
-        {isFounder(currentUser) && (
-          <p className="mt-2 text-[11px] font-medium text-primary">
-            Kurucu yetkileri aktif.
-          </p>
-        )}
       </Widget>
 
       <Widget title="Forum istatistikleri">
         <dl className="grid grid-cols-2 gap-2 text-sm">
-          <Stat label="Konular" value={formatCount(threads.length)} />
-          <Stat label="Mesajlar" value={formatCount(posts.length)} />
+          <Stat label="Konular" value={formatCount(approved.length)} />
+          <Stat label="Mesajlar" value={formatCount(approvedPosts.length)} />
           <Stat label="Üyeler" value={formatCount(members.length)} />
-          <Stat
-            label="Son üye"
-            value={newestMember}
-            neon={newestMember !== "—" && true}
-          />
+          <Stat label="Son üye" value={newestMember} neon={newestMember !== "—"} />
         </dl>
       </Widget>
     </aside>

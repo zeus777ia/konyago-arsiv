@@ -13,6 +13,7 @@ import {
 } from "@/lib/jobs/data";
 import { useJobsStore } from "@/lib/jobs/store";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
+import { moderateContent } from "@/lib/forum/moderation";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/is-ilani/yeni")({
@@ -49,6 +50,11 @@ function NewJobPage() {
     }
     if (!accepted) {
       toast.error("Kuralları onaylayın");
+      return;
+    }
+    const mod = moderateContent(title, description + " " + salaryNote);
+    if (!mod.ok) {
+      toast.error(mod.reason);
       return;
     }
     const id = addJob({

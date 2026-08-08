@@ -5,6 +5,8 @@ export type Category = {
   description: string;
   icon: string;
   color: string;
+  /** Üyeler bu kategoriye konu açamaz (yalnızca kurucu) */
+  lockedForUsers?: boolean;
 };
 
 export type User = {
@@ -14,6 +16,8 @@ export type User = {
   posts: number;
   joined: string;
 };
+
+export type ThreadStatus = "pending" | "approved" | "rejected";
 
 export type Thread = {
   id: string;
@@ -28,6 +32,9 @@ export type Thread = {
   pinned?: boolean;
   locked?: boolean;
   hot?: boolean;
+  /** Yoksa approved sayılır (eski kayıtlar) */
+  status?: ThreadStatus;
+  rejectReason?: string;
 };
 
 export type Post = {
@@ -45,7 +52,6 @@ export const SITE = {
   url: "https://konyagoarsiv.org",
 } as const;
 
-/** Seed users — empty; gerçek üyeler local membership store’da. */
 export const USERS: User[] = [];
 
 export const CATEGORIES: Category[] = [
@@ -53,9 +59,10 @@ export const CATEGORIES: Category[] = [
     id: "duyurular",
     group: "Resmi",
     name: "Duyurular & Kurallar",
-    description: "Forum duyuruları ve kurallar",
+    description: "Yalnızca yönetim duyuruları — üye konu açamaz",
     icon: "megaphone",
     color: "#0f6b52",
+    lockedForUsers: true,
   },
   {
     id: "sicak",
@@ -163,7 +170,6 @@ export const CATEGORIES: Category[] = [
   },
 ];
 
-/** Yeni site — başlangıçta boş; içerik kullanıcılar tarafından eklenir. */
 export const THREADS: Thread[] = [];
 export const POSTS: Post[] = [];
 
@@ -212,4 +218,8 @@ export function hotThreads(limit = 5) {
     .filter((t) => t.hot || t.replies > 5)
     .sort((a, b) => b.replies - a.replies)
     .slice(0, limit);
+}
+
+export function isThreadPublic(t: Thread): boolean {
+  return !t.status || t.status === "approved";
 }

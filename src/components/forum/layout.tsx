@@ -4,7 +4,9 @@ import {
   Home,
   Menu,
   PenSquare,
+  Scale,
   Search,
+  Shield,
   ShoppingBag,
   X,
 } from "lucide-react";
@@ -15,6 +17,9 @@ import { DISCLAIMER_SHORT } from "@/lib/legal/content";
 import { cn } from "@/lib/utils";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { UserButton } from "@/lib/auth/gates";
+import { SeedOfficialForum } from "@/components/forum/seed-official";
+import { isFounder } from "@/lib/staff/founder";
+import { useForumStore } from "@/lib/forum/store";
 
 export function ForumShell({
   children,
@@ -27,9 +32,14 @@ export function ForumShell({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, isPending } = useCurrentUserState();
+  const founder = isFounder(user);
+  const pendingN = useForumStore(
+    (s) => s.threads.filter((t) => t.status === "pending").length,
+  );
 
   return (
     <div className="min-h-dvh bg-bg text-fg">
+      <SeedOfficialForum />
       <div className="bg-header text-header-fg shadow-header">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-3 py-2.5 sm:px-4">
           <button
@@ -80,6 +90,15 @@ export function ForumShell({
             <NavLink to="/is-ilani" icon={<Briefcase className="size-3.5" />}>
               İş panosu
             </NavLink>
+            <NavLink to="/kurallar" icon={<Scale className="size-3.5" />}>
+              Kurallar
+            </NavLink>
+            {founder && (
+              <NavLink to="/moderasyon" icon={<Shield className="size-3.5" />}>
+                Moderasyon
+                {pendingN > 0 ? ` (${pendingN})` : ""}
+              </NavLink>
+            )}
             <NavLink
               to="/yeni-konu"
               icon={<PenSquare className="size-3.5" />}
@@ -128,6 +147,13 @@ export function ForumShell({
           >
             Detay
           </Link>
+          {" · "}
+          <Link
+            to="/kurallar"
+            className="font-medium text-primary underline-offset-2 hover:underline"
+          >
+            Kurallar
+          </Link>
         </p>
       </div>
 
@@ -149,6 +175,9 @@ export function ForumShell({
               </a>
             </p>
             <div className="flex flex-wrap gap-3">
+              <Link to="/kurallar" className="hover:text-primary">
+                Kurallar
+              </Link>
               <Link to="/yasal-uyari" className="hover:text-primary">
                 Yasal uyarı
               </Link>

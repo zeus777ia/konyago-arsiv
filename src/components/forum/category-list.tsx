@@ -1,15 +1,19 @@
 import { Link } from "@tanstack/react-router";
-import { categoryGroups, getCategory } from "@/lib/forum/data";
+import { categoryGroups, getCategory, isThreadPublic } from "@/lib/forum/data";
 import { displayName } from "@/lib/forum/names";
 import { CategoryIcon } from "@/components/forum/icons";
 import { UserName } from "@/components/forum/user-name";
 import { formatCount, formatRelative } from "@/lib/utils";
-import { useForumStore } from "@/lib/forum/store";
+import { filterVisibleThreads, useForumStore } from "@/lib/forum/store";
+import { useCurrentUser } from "@/lib/auth/use-current-user";
+import { isFounder } from "@/lib/staff/founder";
 
 export function CategoryList({ filter = "" }: { filter?: string }) {
   const threads = useForumStore((s) => s.threads);
   const posts = useForumStore((s) => s.posts);
   const names = useForumStore((s) => s.names);
+  const user = useCurrentUser();
+  const founder = isFounder(user);
   const q = filter.trim().toLowerCase();
   const groups = categoryGroups()
     .map(
@@ -27,6 +31,13 @@ export function CategoryList({ filter = "" }: { filter?: string }) {
     )
     .filter(([, cats]) => cats.length > 0);
 
+  const visible = filterVisibleThreads(threads, {
+    isFounder: founder,
+    authorName: user?.displayName,
+    names,
+    includePendingOwn: true,
+  });
+
   return (
     <div className="space-y-4">
       {groups.map(([group, cats]) => (
@@ -41,12 +52,13 @@ export function CategoryList({ filter = "" }: { filter?: string }) {
           </header>
           <ul className="divide-y divide-border">
             {cats.map((cat) => {
-              const catThreads = threads.filter((t) => t.categoryId === cat.id);
-              const topicCount = catThreads.length;
+              const catThreads = visible.filter((t) => t.categoryId === cat.id);
+              const publicOnes = catThreads.filter(isThreadPublic);
+              const topicCount = publicOnes.length;
               const postCount = posts.filter((p) =>
-                catThreads.some((t) => t.id === p.threadId),
+                publicOnes.some((t) => t.id === p.threadId),
               ).length;
-              const last = [...catThreads].sort(
+              const last = [...publicOnes].sort(
                 (a, b) => +new Date(b.lastPostAt) - +new Date(a.lastPostAt),
               )[0];
               return (
@@ -144,8 +156,15 @@ export function LatestThreadsTable({
 }) {
   const threads = useForumStore((s) => s.threads);
   const names = useForumStore((s) => s.names);
+  const user = useCurrentUser();
+  const founder = isFounder(user);
   const q = filter.trim().toLowerCase();
-  const list = [...threads]
+  const list = filterVisibleThreads(threads, {
+    isFounder: founder,
+    authorName: user?.displayName,
+    names,
+    includePendingOwn: true,
+  })
     .sort((a, b) => +new Date(b.lastPostAt) - +new Date(a.lastPostAt))
     .filter(
       (t) =>
@@ -200,9 +219,9 @@ export function LatestThreadsTable({
                               SABİT
                             </span>
                           )}
-                          {t.hot && (
-                            <span className="mt-0.5 rounded bg-accent-soft px-1.5 py-0.5 text-[10px] font-semibold text-accent">
-                              SICAK
+                          {t.status === "pending" && (
+                            <span className="mt-0.5 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
+                              İNCELEME
                             </span>
                           )}
                           <div className="min-w-0">
