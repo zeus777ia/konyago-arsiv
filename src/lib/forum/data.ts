@@ -35,6 +35,10 @@ export type Thread = {
   /** Yoksa approved sayılır (eski kayıtlar) */
   status?: ThreadStatus;
   rejectReason?: string;
+  /** Konu etiketleri (max 5) */
+  tags?: string[];
+  /** Öne çıkan / haftanın konusu */
+  featured?: boolean;
 };
 
 export type Post = {
@@ -43,6 +47,9 @@ export type Post = {
   authorId: string;
   createdAt: string;
   body: string;
+  quotePostId?: string;
+  quoteAuthorName?: string;
+  quoteSnippet?: string;
 };
 
 export const SITE = {
@@ -222,4 +229,16 @@ export function hotThreads(limit = 5) {
 
 export function isThreadPublic(t: Thread): boolean {
   return !t.status || t.status === "approved";
+}
+
+
+export function isFresh(iso: string, hours = 24) {
+  return Date.now() - +new Date(iso) < hours * 3600 * 1000;
+}
+
+export function isUpdatedRecently(t: Thread) {
+  return (
+    isFresh(t.lastPostAt, 24) &&
+    +new Date(t.lastPostAt) - +new Date(t.createdAt) > 60_000
+  );
 }

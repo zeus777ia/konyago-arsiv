@@ -95,8 +95,14 @@ function MarketPage() {
               <Link
                 to="/ikinci-el/$listingId"
                 params={{ listingId: l.id }}
-                className="block h-full rounded-xl border border-border bg-surface p-4 shadow-card transition-colors hover:border-primary/30 hover:bg-surface-hover"
+                className="block h-full overflow-hidden rounded-xl border border-border bg-surface shadow-card transition-colors hover:border-primary/30 hover:bg-surface-hover"
               >
+                {l.imageDataUrl ? (
+                  <div className="aspect-[16/9] bg-bg-elevated">
+                    <img src={l.imageDataUrl} alt="" className="h-full w-full object-cover" />
+                  </div>
+                ) : null}
+                <div className="p-4">
                 <div className="mb-2 flex flex-wrap items-center gap-1.5">
                   <span className="rounded bg-primary-soft px-1.5 py-0.5 text-[10px] font-semibold text-primary">
                     {catLabel}
@@ -119,6 +125,7 @@ function MarketPage() {
                     {l.district} · {formatRelative(l.createdAt)}
                   </span>
                   <span className="font-semibold text-fg">{l.priceNote}</span>
+                </div>
                 </div>
               </Link>
             </li>

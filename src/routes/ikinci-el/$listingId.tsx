@@ -19,6 +19,7 @@ import { formatRelative } from "@/lib/utils";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { isFounder } from "@/lib/staff/founder";
 import { ReportButton } from "@/components/forum/report-button";
+import { SafeMeetingChecklist } from "@/components/forum/safe-meeting";
 
 export const Route = createFileRoute("/ikinci-el/$listingId")({
   component: ListingDetailPage,
@@ -83,6 +84,15 @@ function ListingDetailPage() {
             {listing.district} · {formatRelative(listing.createdAt)} ·{" "}
             <UserName name={listing.authorName} size="sm" />
           </p>
+          {listing.imageDataUrl && (
+            <div className="mt-4 overflow-hidden rounded-lg border border-border">
+              <img
+                src={listing.imageDataUrl}
+                alt=""
+                className="max-h-80 w-full object-contain bg-bg-elevated"
+              />
+            </div>
+          )}
           <p className="mt-4 text-sm leading-relaxed whitespace-pre-wrap text-fg">
             {listing.description}
           </p>
@@ -133,6 +143,7 @@ function ListingDetailPage() {
           <ShieldAlert className="mt-0.5 size-4 shrink-0 text-accent" />
           <p>{MARKETPLACE_NOTICE}</p>
         </div>
+        <SafeMeetingChecklist />
       </article>
     </ForumShell>
   );

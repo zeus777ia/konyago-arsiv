@@ -3,6 +3,7 @@ import { categoryGroups, getCategory, isThreadPublic } from "@/lib/forum/data";
 import { displayName } from "@/lib/forum/names";
 import { CategoryIcon } from "@/components/forum/icons";
 import { UserName } from "@/components/forum/user-name";
+import { FreshBadges, TagChips } from "@/components/forum/fresh-badge";
 import { formatCount, formatRelative } from "@/lib/utils";
 import { filterVisibleThreads, useForumStore } from "@/lib/forum/store";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
@@ -235,13 +236,16 @@ export function LatestThreadsTable({
                             </span>
                           )}
                           <div className="min-w-0">
-                            <Link
-                              to="/konu/$threadId"
-                              params={{ threadId: t.id }}
-                              className="font-medium text-fg hover:text-primary"
-                            >
-                              {t.title}
-                            </Link>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <Link
+                                to="/konu/$threadId"
+                                params={{ threadId: t.id }}
+                                className="font-medium text-fg hover:text-primary"
+                              >
+                                {t.title}
+                              </Link>
+                              <FreshBadges thread={t} />
+                            </div>
                             <p className="mt-0.5 flex flex-wrap items-center gap-1 text-[11px] text-subtle">
                               <UserName
                                 name={displayName(t.authorId, names)}
@@ -249,6 +253,11 @@ export function LatestThreadsTable({
                               />
                               <span>· {formatRelative(t.createdAt)}</span>
                             </p>
+                            {t.tags && t.tags.length > 0 && (
+                              <div className="mt-1">
+                                <TagChips tags={t.tags} />
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -294,13 +303,16 @@ export function LatestThreadsTable({
               const category = getCategory(t.categoryId);
               return (
                 <li key={t.id} className="px-3 py-3">
-                  <Link
-                    to="/konu/$threadId"
-                    params={{ threadId: t.id }}
-                    className="text-sm font-medium text-fg hover:text-primary"
-                  >
-                    {t.title}
-                  </Link>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Link
+                      to="/konu/$threadId"
+                      params={{ threadId: t.id }}
+                      className="text-sm font-medium text-fg hover:text-primary"
+                    >
+                      {t.title}
+                    </Link>
+                    <FreshBadges thread={t} />
+                  </div>
                   <p className="mt-1 text-[11px] text-subtle">
                     {category?.name} · {t.replies} cevap ·{" "}
                     {formatRelative(t.lastPostAt)}

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { SAFETY } from "@/lib/safety/content";
 import { useReportsStore, type ReportTarget } from "@/lib/reports/store";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
+import { notifyUser } from "@/lib/notifications/store";
 
 export function ReportButton({
   targetType,
@@ -33,7 +34,19 @@ export function ReportButton({
       toast.error(res.error);
       return;
     }
-    toast.success("Bildiriminiz kaydedildi. Teşekkürler.");
+    toast.success("Bildiriminiz alındı", {
+      description:
+        "Moderasyon kuyruğuna eklendi. İnceleme sonrası gerekirse işlem yapılır. Teşekkürler.",
+      duration: 5000,
+    });
+    if (user?.displayName) {
+      notifyUser(user.displayName, {
+        kind: "report_ack",
+        title: "Bildiriminiz alındı",
+        body: "İçerik inceleme kuyruğuna eklendi. Gerekli görülürse işlem yapılır.",
+        href: "/guvenlik",
+      });
+    }
     setOpen(false);
     setReason("");
     setDetail("");

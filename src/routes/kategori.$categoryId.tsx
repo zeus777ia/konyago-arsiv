@@ -11,6 +11,8 @@ import { formatCount, formatRelative } from "@/lib/utils";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { isFounder } from "@/lib/staff/founder";
 import { isCategoryLockedForUsers } from "@/lib/forum/moderation";
+import { startersFor } from "@/lib/forum/templates";
+import { FreshBadges } from "@/components/forum/fresh-badge";
 
 export const Route = createFileRoute("/kategori/$categoryId")({
   component: CategoryPage,
@@ -152,6 +154,7 @@ function CategoryPage() {
                           >
                             {t.title}
                           </Link>
+                          <FreshBadges thread={t} />
                         </div>
                         <p className="mt-0.5 flex flex-wrap items-center gap-1 text-[11px] text-subtle">
                           <UserName
@@ -205,16 +208,34 @@ function CategoryPage() {
             </ul>
           </>
         ) : (
-          <div className="px-4 py-10 text-center">
-            <p className="text-sm text-muted">Bu kategoride henüz konu yok.</p>
+          <div className="px-4 py-8">
+            <p className="text-center text-sm text-muted">
+              Bu kategoride henüz konu yok — ilk sen yaz.
+            </p>
             {!locked && (
-              <Link
-                to="/yeni-konu"
-                search={{ kategori: cat.id }}
-                className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
-              >
-                İlk konuyu sen aç
-              </Link>
+              <div className="mx-auto mt-4 max-w-lg space-y-2">
+                {startersFor(cat.id).map((s) => (
+                  <Link
+                    key={s.title}
+                    to="/yeni-konu"
+                    search={{ kategori: cat.id }}
+                    className="block rounded-lg border border-border bg-bg-elevated px-3 py-2.5 text-left transition-colors hover:border-primary/30 hover:bg-primary-soft/40"
+                    onClick={() => {
+                      try {
+                        sessionStorage.setItem(
+                          "konyago-draft-topic",
+                          JSON.stringify({ title: s.title, body: s.body, kategori: cat.id }),
+                        );
+                      } catch {}
+                    }}
+                  >
+                    <p className="text-sm font-medium text-fg">{s.title}</p>
+                    <p className="mt-0.5 line-clamp-2 text-[11px] text-subtle">
+                      {s.body}
+                    </p>
+                  </Link>
+                ))}
+              </div>
             )}
           </div>
         )}

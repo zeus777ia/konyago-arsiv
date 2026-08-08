@@ -1,0 +1,18 @@
+{
+  "name": "KonyaGo Arşiv",
+  "short_name": "KonyaGo",
+  "description": "Forum, ikinci el ve iş panosu — konyagoarsiv.org",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f4ef",
+  "theme_color": "#0b3d32",
+  "lang": "tr",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

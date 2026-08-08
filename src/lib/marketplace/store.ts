@@ -17,6 +17,7 @@ type MarketState = {
     priceNote: string;
     contact: string;
     authorName: string;
+    imageDataUrl?: string;
   }) => string;
   markSold: (id: string) => void;
   removeListing: (id: string) => void;
@@ -44,6 +45,7 @@ export const useMarketplaceStore = create<MarketState>()(
           authorName: input.authorName.trim() || "Misafir",
           createdAt: new Date().toISOString(),
           status: "aktif",
+          imageDataUrl: input.imageDataUrl,
         };
         set({ listings: [listing, ...get().listings] });
         return listingId;

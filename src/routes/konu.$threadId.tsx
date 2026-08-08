@@ -10,7 +10,9 @@ import {
   Flame,
   Lock,
   Pin,
+  Quote,
   Send,
+  Sparkles,
   Trash2,
   Unlock,
   X,
@@ -20,6 +22,7 @@ import { toast, Toaster } from "sonner";
 import { ForumShell } from "@/components/forum/layout";
 import { Avatar } from "@/components/forum/avatar";
 import { UserName } from "@/components/forum/user-name";
+import { FreshBadges, TagChips } from "@/components/forum/fresh-badge";
 import { Button } from "@/components/ui/button";
 import { getCategory, getUser } from "@/lib/forum/data";
 import { displayName } from "@/lib/forum/names";
@@ -33,6 +36,12 @@ export const Route = createFileRoute("/konu/$threadId")({
   component: ThreadPage,
 });
 
+type QuoteDraft = {
+  postId: string;
+  authorName: string;
+  snippet: string;
+};
+
 function ThreadPage() {
   const { threadId } = Route.useParams();
   const navigate = useNavigate();
@@ -45,6 +54,7 @@ function ThreadPage() {
   const togglePin = useForumStore((s) => s.togglePin);
   const toggleLock = useForumStore((s) => s.toggleLock);
   const toggleHot = useForumStore((s) => s.toggleHot);
+  const setFeaturedThread = useForumStore((s) => s.setFeaturedThread);
   const approveThread = useForumStore((s) => s.approveThread);
   const rejectThread = useForumStore((s) => s.rejectThread);
   const bumpViews = useForumStore((s) => s.bumpViews);
@@ -52,6 +62,7 @@ function ThreadPage() {
   const founder = isFounder(user);
   const [body, setBody] = useState("");
   const [honeypot, setHoneypot] = useState("");
+  const [quote, setQuote] = useState<QuoteDraft | null>(null);
   const formStartedAt = useMemo(() => Date.now(), []);
 
   const thread = threads.find((t) => t.id === threadId);
@@ -102,12 +113,14 @@ function ThreadPage() {
       asFounder: founder,
       honeypot,
       formStartedAt,
+      quote: quote ?? undefined,
     });
     if (!res.ok) {
       toast.error(res.error);
       return;
     }
     setBody("");
+    setQuote(null);
     toast.success("Cevabınız eklendi");
   };
 
@@ -159,6 +172,11 @@ function ThreadPage() {
               SICAK
             </span>
           )}
+          {thread.featured && (
+            <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-800">
+              ÖNE ÇIKAN
+            </span>
+          )}
           {thread.locked && (
             <span className="rounded bg-badge px-1.5 py-0.5 text-[10px] font-semibold text-muted">
               KİLİTLİ
@@ -169,10 +187,16 @@ function ThreadPage() {
               İNCELEMEDE
             </span>
           )}
+          <FreshBadges thread={thread} />
         </div>
         <h1 className="text-lg font-semibold tracking-tight text-fg sm:text-xl">
           {thread.title}
         </h1>
+        {thread.tags && thread.tags.length > 0 && (
+          <div className="mt-2">
+            <TagChips tags={thread.tags} />
+          </div>
+        )}
         <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
           <p className="flex flex-wrap items-center gap-1 text-xs text-subtle">
             <UserName name={displayName(thread.authorId, names)} size="sm" />
@@ -196,7 +220,7 @@ function ThreadPage() {
                   size="sm"
                   onClick={() => {
                     approveThread(threadId);
-                    toast.success("Onaylandı");
+                    toast.success("Onaylandı — yazara bildirim gitti");
                   }}
                 >
                   <Check className="size-3.5" />
@@ -209,7 +233,7 @@ function ThreadPage() {
                   className="text-danger"
                   onClick={() => {
                     rejectThread(threadId);
-                    toast.message("Reddedildi");
+                    toast.message("Reddedildi — yazara bildirim gitti");
                   }}
                 >
                   <X className="size-3.5" />
@@ -259,6 +283,22 @@ function ThreadPage() {
               <Flame className="size-3.5" />
               {thread.hot ? "Sıcak kaldır" : "Sıcak yap"}
             </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => {
+                setFeaturedThread(threadId);
+                toast.success(
+                  thread.featured
+                    ? "Öne çıkan kaldırıldı"
+                    : "Haftanın / öne çıkan arşive alındı",
+                );
+              }}
+            >
+              <Sparkles className="size-3.5" />
+              {thread.featured ? "Öne çıkanı kaldır" : "Öne çıkar"}
+            </Button>
             {!threadId.startsWith("official_") && (
               <Button
                 type="button"
@@ -287,6 +327,7 @@ function ThreadPage() {
           return (
             <article
               key={post.id}
+              id={`p-${post.id}`}
               className="overflow-hidden rounded-lg border border-border bg-surface shadow-card"
             >
               <div className="grid sm:grid-cols-[160px_minmax(0,1fr)]">
@@ -312,7 +353,30 @@ function ThreadPage() {
                       #{idx + 1} · {formatRelative(post.createdAt)}
                     </span>
                     <div className="flex items-center gap-2">
-                      <ReportButton targetType="post" targetId={post.id} compact />
+                      {user && (
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-primary hover:bg-primary-soft"
+                          onClick={() => {
+                            setQuote({
+                              postId: post.id,
+                              authorName: name,
+                              snippet: post.body.slice(0, 280),
+                            });
+                            document
+                              .getElementById("reply-box")
+                              ?.scrollIntoView({ behavior: "smooth" });
+                          }}
+                        >
+                          <Quote className="size-3" />
+                          Alıntıla
+                        </button>
+                      )}
+                      <ReportButton
+                        targetType="post"
+                        targetId={post.id}
+                        compact
+                      />
                       {founder && !post.id.startsWith("official_") && (
                         <button
                           type="button"
@@ -329,6 +393,16 @@ function ThreadPage() {
                       )}
                     </div>
                   </div>
+                  {post.quoteSnippet && (
+                    <blockquote className="mb-3 rounded-md border-l-4 border-primary/40 bg-bg-elevated px-3 py-2 text-xs text-muted">
+                      <p className="mb-0.5 font-semibold text-fg">
+                        {post.quoteAuthorName ?? "Üye"} yazmış:
+                      </p>
+                      <p className="line-clamp-4 whitespace-pre-wrap">
+                        {post.quoteSnippet}
+                      </p>
+                    </blockquote>
+                  )}
                   <div className="text-sm leading-relaxed whitespace-pre-wrap text-fg">
                     {renderBody(post.body)}
                   </div>
@@ -356,13 +430,41 @@ function ThreadPage() {
         </p>
       ) : (
         <form
+          id="reply-box"
           onSubmit={submit}
           className="relative mt-5 rounded-lg border border-border bg-surface p-4 shadow-card"
         >
-          <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden>
-            <input tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+          <div
+            className="absolute -left-[9999px] h-0 w-0 overflow-hidden"
+            aria-hidden
+          >
+            <input
+              tabIndex={-1}
+              autoComplete="off"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+            />
           </div>
           <h2 className="mb-2 text-sm font-semibold text-fg">Cevap yaz</h2>
+          {quote && (
+            <div className="mb-3 rounded-md border border-primary/20 bg-primary-soft/50 px-3 py-2 text-xs">
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <span className="font-semibold text-primary">
+                  Alıntı: {quote.authorName}
+                </span>
+                <button
+                  type="button"
+                  className="text-subtle hover:text-fg"
+                  onClick={() => setQuote(null)}
+                >
+                  Kaldır
+                </button>
+              </div>
+              <p className="line-clamp-3 text-muted whitespace-pre-wrap">
+                {quote.snippet}
+              </p>
+            </div>
+          )}
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}

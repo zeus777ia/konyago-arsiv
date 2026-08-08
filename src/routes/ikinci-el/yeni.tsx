@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, ShieldAlert } from "lucide-react";
 import { useMemo, useState } from "react";
+import { SafeMeetingChecklist } from "@/components/forum/safe-meeting";
 import { toast, Toaster } from "sonner";
 import { ForumShell } from "@/components/forum/layout";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import {
   DISTRICTS,
   LISTING_CATEGORIES,
   MARKETPLACE_NOTICE,
+  compressImageFile,
   type ListingCategory,
   type ListingCondition,
 } from "@/lib/marketplace/data";
@@ -35,8 +37,10 @@ function NewListingPage() {
   const [contact, setContact] = useState("");
   const [accepted, setAccepted] = useState(false);
   const [honeypot, setHoneypot] = useState("");
+  const [imageDataUrl, setImageDataUrl] = useState<string | undefined>();
+  const [imgBusy, setImgBusy] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
       toast.error("İlan vermek için giriş yapın");
@@ -84,6 +88,7 @@ function NewListingPage() {
       priceNote: priceNote || "Fiyat görüşülür",
       contact,
       authorName: user.displayName ?? "Üye",
+      imageDataUrl,
     });
     recordSpamEvent("listing", title + "\n" + description);
     toast.success("İlan yayınlandı");
@@ -198,6 +203,41 @@ function NewListingPage() {
               placeholder="Telefon veya kullanıcı adı"
             />
           </Field>
+          <Field label="Fotoğraf (isteğe bağlı, tek görsel)">
+            <input
+              type="file"
+              accept="image/*"
+              className="block w-full text-xs text-muted file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-primary-fg"
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (!f) {
+                  setImageDataUrl(undefined);
+                  return;
+                }
+                setImgBusy(true);
+                try {
+                  const url = await compressImageFile(f);
+                  setImageDataUrl(url);
+                  toast.success("Görsel eklendi");
+                } catch (err) {
+                  setImageDataUrl(undefined);
+                  toast.error(err instanceof Error ? err.message : "Görsel yüklenemedi");
+                } finally {
+                  setImgBusy(false);
+                }
+              }}
+            />
+            {imageDataUrl && (
+              <img
+                src={imageDataUrl}
+                alt=""
+                className="mt-2 max-h-40 rounded-md border border-border object-contain"
+              />
+            )}
+            <span className="text-[11px] text-subtle">
+              Otomatik sıkıştırılır; tarayıcıda saklanır (max ~400KB).
+            </span>
+          </Field>
           <label className="flex items-start gap-2 text-xs text-muted">
             <input
               type="checkbox"
@@ -210,10 +250,11 @@ function NewListingPage() {
               Dolandırıcılığa karşı dikkatli olacağım.
             </span>
           </label>
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full" disabled={imgBusy}>
             İlanı yayınla
           </Button>
         </form>
+        <SafeMeetingChecklist />
       </div>
     </ForumShell>
   );

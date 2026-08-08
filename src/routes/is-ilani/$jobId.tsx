@@ -15,6 +15,7 @@ import { formatRelative } from "@/lib/utils";
 import { useCurrentUser } from "@/lib/auth/use-current-user";
 import { isFounder } from "@/lib/staff/founder";
 import { ReportButton } from "@/components/forum/report-button";
+import { JobScamWarning } from "@/components/forum/job-scam-warning";
 
 export const Route = createFileRoute("/is-ilani/$jobId")({
   component: JobDetailPage,
@@ -130,6 +131,7 @@ function JobDetailPage() {
           <ShieldAlert className="mt-0.5 size-4 shrink-0 text-primary" />
           <p>{JOBS_NOTICE}</p>
         </div>
+        <JobScamWarning />
       </article>
     </ForumShell>
   );

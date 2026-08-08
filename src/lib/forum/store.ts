@@ -4,6 +4,11 @@ import type { Post, Thread, ThreadStatus } from "./data";
 import { ensureOfficialContent } from "./official-seed";
 import { canPostInCategory, moderateContent } from "./moderation";
 import { recordSpamEvent, runAllSpamChecks } from "./spam";
+import { normalizeTags } from "./tags";
+import { notifyUser } from "@/lib/notifications/store";
+import { sendAppEmail } from "@/lib/email/send";
+import { useMembersStore } from "@/lib/members/store";
+import { useSiteMetaStore } from "@/lib/site/announcements";
 
 export type AddThreadResult =
   | { ok: true; threadId: string; status: ThreadStatus }
@@ -22,6 +27,7 @@ type ForumState = {
     title: string;
     body: string;
     authorName: string;
+    tags?: string[];
     asFounder?: boolean;
     honeypot?: string;
     formStartedAt?: number;
@@ -33,6 +39,11 @@ type ForumState = {
     asFounder?: boolean;
     honeypot?: string;
     formStartedAt?: number;
+    quote?: {
+      postId: string;
+      authorName: string;
+      snippet: string;
+    };
   }) => AddReplyResult;
   bumpViews: (threadId: string) => void;
   deleteThread: (threadId: string) => void;
@@ -40,12 +51,28 @@ type ForumState = {
   togglePin: (threadId: string) => void;
   toggleLock: (threadId: string) => void;
   toggleHot: (threadId: string) => void;
+  setFeaturedThread: (threadId: string | null) => void;
   approveThread: (threadId: string) => void;
   rejectThread: (threadId: string, reason?: string) => void;
 };
 
 function id(prefix: string) {
   return `${prefix}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function emailForDisplayName(name: string): string | null {
+  const m = useMembersStore
+    .getState()
+    .members.find((x) => x.displayName === name);
+  return m?.email ?? null;
+}
+
+function prefersModMail(name: string): boolean {
+  const m = useMembersStore
+    .getState()
+    .members.find((x) => x.displayName === name);
+  if (!m) return false;
+  return m.prefs?.notifyModeration !== false;
 }
 
 export const useForumStore = create<ForumState>()(
@@ -74,6 +101,7 @@ export const useForumStore = create<ForumState>()(
         title,
         body,
         authorName,
+        tags,
         asFounder,
         honeypot,
         formStartedAt,
@@ -114,6 +142,7 @@ export const useForumStore = create<ForumState>()(
           status,
           locked: false,
           pinned: false,
+          tags: normalizeTags(tags),
         };
         const post: Post = {
           id: id("p"),
@@ -129,6 +158,12 @@ export const useForumStore = create<ForumState>()(
         });
         if (!asFounder) {
           recordSpamEvent("thread", `${title}\n${body}`);
+          notifyUser(authorName, {
+            kind: "system",
+            title: "Konunuz incelemeye alındı",
+            body: `"${title.trim().slice(0, 60)}" moderasyon kuyruğunda.`,
+            href: `/konu/${threadId}`,
+          });
         }
         return { ok: true, threadId, status };
       },
@@ -139,6 +174,7 @@ export const useForumStore = create<ForumState>()(
         asFounder,
         honeypot,
         formStartedAt,
+        quote,
       }) => {
         const thread = get().threads.find((t) => t.id === threadId);
         if (!thread) return { ok: false, error: "Konu bulunamadı" };
@@ -176,6 +212,9 @@ export const useForumStore = create<ForumState>()(
           authorId,
           createdAt: now,
           body: body.trim(),
+          quotePostId: quote?.postId,
+          quoteAuthorName: quote?.authorName,
+          quoteSnippet: quote?.snippet?.slice(0, 280),
         };
         set({
           posts: [...get().posts, post],
@@ -192,6 +231,26 @@ export const useForumStore = create<ForumState>()(
           ),
         });
         if (!asFounder) recordSpamEvent("reply", body);
+
+        const ownerName = get().names[thread.authorId];
+        if (ownerName && ownerName !== authorName) {
+          notifyUser(ownerName, {
+            kind: "reply",
+            title: "Konunuza yeni cevap",
+            body: `${authorName}: ${body.trim().slice(0, 80)}`,
+            href: `/konu/${threadId}`,
+          });
+          if (prefersModMail(ownerName)) {
+            const em = emailForDisplayName(ownerName);
+            if (em) {
+              void sendAppEmail({
+                to: em,
+                subject: `[KonyaGo Arşiv] Konunuza yeni cevap: ${thread.title.slice(0, 40)}`,
+                text: `Merhaba ${ownerName},\n\n"${thread.title}" konusuna ${authorName} cevap yazdı.\n\n${body.trim().slice(0, 200)}\n\nGörüntüle: https://konyagoarsiv.org/konu/${threadId}\n\n— KonyaGo Arşiv (info@konyago.com.tr)`,
+              }).catch(() => undefined);
+            }
+          }
+        }
         return { ok: true };
       },
       bumpViews: (threadId) => {
@@ -251,28 +310,107 @@ export const useForumStore = create<ForumState>()(
           ),
         });
       },
-      approveThread: (threadId) => {
+      setFeaturedThread: (threadId) => {
+        if (!threadId) {
+          set({
+            threads: get().threads.map((t) =>
+              t.featured ? { ...t, featured: false } : t,
+            ),
+          });
+          useSiteMetaStore.getState().setFeatured(null);
+          return;
+        }
+        const target = get().threads.find((t) => t.id === threadId);
+        if (!target) return;
+        const was = !!target.featured;
         set({
-          threads: get().threads.map((t) =>
-            t.id === threadId
-              ? { ...t, status: "approved", rejectReason: undefined }
-              : t,
+          threads: get().threads.map((t) => ({
+            ...t,
+            featured: t.id === threadId ? !was : false,
+          })),
+        });
+        if (!was) {
+          useSiteMetaStore.getState().setFeatured(threadId);
+          const name = get().names[target.authorId];
+          if (name) {
+            notifyUser(name, {
+              kind: "featured",
+              title: "Konunuz öne çıkarıldı",
+              body: `"${target.title.slice(0, 60)}" arşivde öne çıktı.`,
+              href: `/konu/${threadId}`,
+            });
+          }
+        } else {
+          useSiteMetaStore.getState().setFeatured(null);
+        }
+      },
+      approveThread: (threadId) => {
+        const t = get().threads.find((x) => x.id === threadId);
+        set({
+          threads: get().threads.map((x) =>
+            x.id === threadId
+              ? { ...x, status: "approved", rejectReason: undefined }
+              : x,
           ),
         });
+        if (t) {
+          const name = get().names[t.authorId];
+          if (name) {
+            notifyUser(name, {
+              kind: "moderation_approved",
+              title: "Konunuz onaylandı",
+              body: `"${t.title.slice(0, 60)}" yayında.`,
+              href: `/konu/${threadId}`,
+            });
+            if (prefersModMail(name)) {
+              const em = emailForDisplayName(name);
+              if (em) {
+                void sendAppEmail({
+                  to: em,
+                  subject: `[KonyaGo Arşiv] Konunuz onaylandı: ${t.title.slice(0, 40)}`,
+                  text: `Merhaba ${name},\n\n"${t.title}" konunuz moderasyon tarafından onaylandı ve yayında.\n\nhttps://konyagoarsiv.org/konu/${threadId}\n\n— KonyaGo Arşiv (info@konyago.com.tr)`,
+                }).catch(() => undefined);
+              }
+            }
+          }
+        }
       },
       rejectThread: (threadId, reason) => {
+        const t = get().threads.find((x) => x.id === threadId);
+        const why = reason ?? "Kurallara aykırı";
         set({
-          threads: get().threads.map((t) =>
-            t.id === threadId
+          threads: get().threads.map((x) =>
+            x.id === threadId
               ? {
-                  ...t,
+                  ...x,
                   status: "rejected",
-                  rejectReason: reason ?? "Kurallara aykırı",
+                  rejectReason: why,
                   locked: true,
                 }
-              : t,
+              : x,
           ),
         });
+        if (t) {
+          const name = get().names[t.authorId];
+          if (name) {
+            notifyUser(name, {
+              kind: "moderation_rejected",
+              title: "Konunuz reddedildi",
+              body: `"${t.title.slice(0, 50)}" — ${why}`,
+              href: `/konu/${threadId}`,
+            });
+            if (prefersModMail(name)) {
+              const em = emailForDisplayName(name);
+              if (em) {
+                void sendAppEmail({
+                  to: em,
+                  subject: `[KonyaGo Arşiv] Konu reddedildi: ${t.title.slice(0, 40)}`,
+                  text: `Merhaba ${name},\n\n"${t.title}" konunuz reddedildi.\nGerekçe: ${why}\n\nKurallar: https://konyagoarsiv.org/kurallar\n\n— KonyaGo Arşiv (info@konyago.com.tr)`,
+                }).catch(() => undefined);
+              }
+            }
+          }
+        }
       },
     }),
     {

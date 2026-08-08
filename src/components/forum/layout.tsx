@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Briefcase,
   Home,
@@ -22,6 +22,8 @@ import { SeedOfficialForum } from "@/components/forum/seed-official";
 import { isFounder } from "@/lib/staff/founder";
 import { useForumStore } from "@/lib/forum/store";
 import { useReportsStore } from "@/lib/reports/store";
+import { NotificationBell } from "@/components/forum/notification-bell";
+import { FounderBanner } from "@/components/forum/founder-banner";
 
 export function ForumShell({
   children,
@@ -33,6 +35,8 @@ export function ForumShell({
   onSearch?: (q: string) => void;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [localQ, setLocalQ] = useState(search ?? "");
+  const navigate = useNavigate();
   const { user, isPending } = useCurrentUserState();
   const founder = isFounder(user);
   const pendingN = useForumStore(
@@ -41,6 +45,20 @@ export function ForumShell({
   const openReports = useReportsStore(
     (s) => s.reports.filter((r) => r.status === "open").length,
   );
+
+  const qValue = onSearch ? (search ?? "") : localQ;
+  const setQ = (v: string) => {
+    if (onSearch) onSearch(v);
+    else setLocalQ(v);
+  };
+
+  const goSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const q = qValue.trim();
+    if (q.length < 2) return;
+    void navigate({ to: "/ara", search: { q } });
+    setMobileOpen(false);
+  };
 
   return (
     <div className="min-h-dvh bg-bg text-fg">
@@ -72,6 +90,7 @@ export function ForumShell({
                 Yeni konu
               </Button>
             </Link>
+            <NotificationBell />
             {isPending ? (
               <div className="size-8 animate-pulse rounded-full bg-white/10" />
             ) : user ? (
@@ -120,34 +139,41 @@ export function ForumShell({
             >
               Yeni konu
             </NavLink>
-            <div className="ml-auto hidden w-full max-w-xs md:block md:w-auto md:flex-1 md:max-w-sm">
+            <form
+              onSubmit={goSearch}
+              className="ml-auto hidden w-full max-w-xs md:block md:w-auto md:flex-1 md:max-w-sm"
+            >
               <label className="relative block">
                 <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-header-muted" />
                 <input
                   type="search"
-                  value={search ?? ""}
-                  onChange={(e) => onSearch?.(e.target.value)}
-                  placeholder="Ara…"
+                  value={qValue}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Forum, ilan, iş ara…"
                   className="h-8 w-full rounded-md border border-white/10 bg-white/10 py-1 pr-3 pl-8 text-xs text-header-fg placeholder:text-header-muted outline-none focus:border-white/25 focus:bg-white/15"
                 />
               </label>
-            </div>
+            </form>
           </div>
         </div>
       </div>
 
+      <FounderBanner />
+
       {mobileOpen && (
         <div className="border-b border-border bg-surface px-3 py-3 lg:hidden">
-          <label className="relative block">
-            <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-subtle" />
-            <input
-              type="search"
-              value={search ?? ""}
-              onChange={(e) => onSearch?.(e.target.value)}
-              placeholder="Ara…"
-              className="h-10 w-full rounded-md border border-border bg-bg-elevated py-2 pr-3 pl-9 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
-            />
-          </label>
+          <form onSubmit={goSearch}>
+            <label className="relative block">
+              <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-subtle" />
+              <input
+                type="search"
+                value={qValue}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Forum, ilan, iş ara…"
+                className="h-10 w-full rounded-md border border-border bg-bg-elevated py-2 pr-3 pl-9 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15"
+              />
+            </label>
+          </form>
         </div>
       )}
 
@@ -197,6 +223,9 @@ export function ForumShell({
               </a>
             </p>
             <div className="flex flex-wrap gap-3">
+              <Link to="/ara" className="hover:text-primary">
+                Arama
+              </Link>
               <Link to="/guvenlik" className="hover:text-primary">
                 Güvenlik
               </Link>

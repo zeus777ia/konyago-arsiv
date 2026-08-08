@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AraRouteImport } from './routes/ara'
 import { Route as GizlilikRouteImport } from './routes/gizlilik'
 import { Route as GuvenlikRouteImport } from './routes/guvenlik'
 import { Route as HesabimRouteImport } from './routes/hesabim'
@@ -29,11 +30,17 @@ import { Route as IsIlaniJobIdRouteImport } from './routes/is-ilani/$jobId'
 import { Route as IsIlaniYeniRouteImport } from './routes/is-ilani/yeni'
 import { Route as KategoriCategoryIdRouteImport } from './routes/kategori.$categoryId'
 import { Route as KonuThreadIdRouteImport } from './routes/konu.$threadId'
+import { Route as UyeNameRouteImport } from './routes/uye.$name'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AraRoute = AraRouteImport.update({
+  id: '/ara',
+  path: '/ara',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GizlilikRoute = GizlilikRouteImport.update({
@@ -131,6 +138,11 @@ const KonuThreadIdRoute = KonuThreadIdRouteImport.update({
   path: '/konu/$threadId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UyeNameRoute = UyeNameRouteImport.update({
+  id: '/uye/$name',
+  path: '/uye/$name',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -139,6 +151,7 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ara': typeof AraRoute
   '/gizlilik': typeof GizlilikRoute
   '/guvenlik': typeof GuvenlikRoute
   '/hesabim': typeof HesabimRoute
@@ -156,12 +169,14 @@ export interface FileRoutesByFullPath {
   '/is-ilani/yeni': typeof IsIlaniYeniRoute
   '/kategori/$categoryId': typeof KategoriCategoryIdRoute
   '/konu/$threadId': typeof KonuThreadIdRoute
+  '/uye/$name': typeof UyeNameRoute
   '/ikinci-el/': typeof IkinciElIndexRoute
   '/is-ilani/': typeof IsIlaniIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ara': typeof AraRoute
   '/gizlilik': typeof GizlilikRoute
   '/guvenlik': typeof GuvenlikRoute
   '/hesabim': typeof HesabimRoute
@@ -179,6 +194,7 @@ export interface FileRoutesByTo {
   '/is-ilani/yeni': typeof IsIlaniYeniRoute
   '/kategori/$categoryId': typeof KategoriCategoryIdRoute
   '/konu/$threadId': typeof KonuThreadIdRoute
+  '/uye/$name': typeof UyeNameRoute
   '/ikinci-el': typeof IkinciElIndexRoute
   '/is-ilani': typeof IsIlaniIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -186,6 +202,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ara': typeof AraRoute
   '/gizlilik': typeof GizlilikRoute
   '/guvenlik': typeof GuvenlikRoute
   '/hesabim': typeof HesabimRoute
@@ -203,6 +220,7 @@ export interface FileRoutesById {
   '/is-ilani/yeni': typeof IsIlaniYeniRoute
   '/kategori/$categoryId': typeof KategoriCategoryIdRoute
   '/konu/$threadId': typeof KonuThreadIdRoute
+  '/uye/$name': typeof UyeNameRoute
   '/ikinci-el/': typeof IkinciElIndexRoute
   '/is-ilani/': typeof IsIlaniIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -211,6 +229,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ara'
     | '/gizlilik'
     | '/guvenlik'
     | '/hesabim'
@@ -228,12 +247,14 @@ export interface FileRouteTypes {
     | '/is-ilani/yeni'
     | '/kategori/$categoryId'
     | '/konu/$threadId'
+    | '/uye/$name'
     | '/ikinci-el/'
     | '/is-ilani/'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ara'
     | '/gizlilik'
     | '/guvenlik'
     | '/hesabim'
@@ -251,12 +272,14 @@ export interface FileRouteTypes {
     | '/is-ilani/yeni'
     | '/kategori/$categoryId'
     | '/konu/$threadId'
+    | '/uye/$name'
     | '/ikinci-el'
     | '/is-ilani'
     | '/api/auth/$'
   id:
     | '__root__'
     | '/'
+    | '/ara'
     | '/gizlilik'
     | '/guvenlik'
     | '/hesabim'
@@ -274,6 +297,7 @@ export interface FileRouteTypes {
     | '/is-ilani/yeni'
     | '/kategori/$categoryId'
     | '/konu/$threadId'
+    | '/uye/$name'
     | '/ikinci-el/'
     | '/is-ilani/'
     | '/api/auth/$'
@@ -281,6 +305,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AraRoute: typeof AraRoute
   GizlilikRoute: typeof GizlilikRoute
   GuvenlikRoute: typeof GuvenlikRoute
   HesabimRoute: typeof HesabimRoute
@@ -298,6 +323,7 @@ export interface RootRouteChildren {
   IsIlaniYeniRoute: typeof IsIlaniYeniRoute
   KategoriCategoryIdRoute: typeof KategoriCategoryIdRoute
   KonuThreadIdRoute: typeof KonuThreadIdRoute
+  UyeNameRoute: typeof UyeNameRoute
   IkinciElIndexRoute: typeof IkinciElIndexRoute
   IsIlaniIndexRoute: typeof IsIlaniIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -310,6 +336,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ara': {
+      id: '/ara'
+      path: '/ara'
+      fullPath: '/ara'
+      preLoaderRoute: typeof AraRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gizlilik': {
@@ -445,6 +478,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KonuThreadIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/uye/$name': {
+      id: '/uye/$name'
+      path: '/uye/$name'
+      fullPath: '/uye/$name'
+      preLoaderRoute: typeof UyeNameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -457,6 +497,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AraRoute: AraRoute,
   GizlilikRoute: GizlilikRoute,
   GuvenlikRoute: GuvenlikRoute,
   HesabimRoute: HesabimRoute,
@@ -474,6 +515,7 @@ const rootRouteChildren: RootRouteChildren = {
   IsIlaniYeniRoute: IsIlaniYeniRoute,
   KategoriCategoryIdRoute: KategoriCategoryIdRoute,
   KonuThreadIdRoute: KonuThreadIdRoute,
+  UyeNameRoute: UyeNameRoute,
   IkinciElIndexRoute: IkinciElIndexRoute,
   IsIlaniIndexRoute: IsIlaniIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
