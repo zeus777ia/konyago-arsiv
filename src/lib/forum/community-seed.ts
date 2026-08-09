@@ -6,32 +6,32 @@
 import type { Post, Thread } from "@/lib/forum/data";
 import type { Member } from "@/lib/members/store";
 
-export const COMMUNITY_SEED_FLAG = "konyago-community-seed-v1";
+export const COMMUNITY_SEED_FLAG = "konyago-community-seed-v2";
 export const COMMUNITY_DEMO_PASSWORD = "Konya2026a";
 
 export const COMMUNITY_NAMES: Record<string, string> = {
-  "mbr_seed_01": "SelçukluGezgini",
-  "mbr_seed_02": "MeramRüzgarı",
-  "mbr_seed_03": "KaratayNotları",
-  "mbr_seed_04": "SilleTaş",
-  "mbr_seed_05": "EtliEkmekSever",
-  "mbr_seed_06": "TramvaySaati",
-  "mbr_seed_07": "FotoKonya",
-  "mbr_seed_08": "TarihDefteri",
-  "mbr_seed_09": "SemazenNot",
-  "mbr_seed_10": "KampüsKonya",
-  "mbr_seed_11": "İşKapısı42",
-  "mbr_seed_12": "İkinciElKonya",
-  "mbr_seed_13": "AileRotası",
-  "mbr_seed_14": "GeceKonya",
-  "mbr_seed_15": "YeniKomşu42"
+  "mbr_seed_01": "Ahmet Yılmaz",
+  "mbr_seed_02": "Elif Demir",
+  "mbr_seed_03": "Mehmet Kaya",
+  "mbr_seed_04": "Zeynep Arslan",
+  "mbr_seed_05": "Mustafa Çelik",
+  "mbr_seed_06": "Ayşe Öztürk",
+  "mbr_seed_07": "Emre Şahin",
+  "mbr_seed_08": "Fatma Aydın",
+  "mbr_seed_09": "Burak Yıldız",
+  "mbr_seed_10": "Merve Koç",
+  "mbr_seed_11": "Hakan Acar",
+  "mbr_seed_12": "Selin Doğan",
+  "mbr_seed_13": "Can Özkan",
+  "mbr_seed_14": "Deniz Kurt",
+  "mbr_seed_15": "İrem Polat"
 };
 
 export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_01",
     "email": "uye01.arsiv@konyago.demo",
-    "displayName": "SelçukluGezgini",
+    "displayName": "Ahmet Yılmaz",
     "passwordHash": "1c681e1049dbd1ada50553fd4765d319c468b78f4d73d510c5d651a85768fac8",
     "createdAt": "2026-08-03T09:00:00.000Z",
     "updatedAt": "2026-08-03T09:00:00.000Z",
@@ -45,7 +45,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Konya rotaları ve hafta sonu planları.",
+      "bio": "Hafta sonu rota ve gezi planları yapmayı severim.",
       "city": "Konya",
       "district": "Selçuklu",
       "website": "",
@@ -61,7 +61,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_02",
     "email": "uye02.arsiv@konyago.demo",
-    "displayName": "MeramRüzgarı",
+    "displayName": "Elif Demir",
     "passwordHash": "d05bdaeed44d89b87f2924f90e6d1e9fe55368106fd418865e3873d7134e75ae",
     "createdAt": "2026-08-03T10:00:00.000Z",
     "updatedAt": "2026-08-03T10:00:00.000Z",
@@ -75,7 +75,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Meram bağları, akşam yürüyüşü.",
+      "bio": "Meram tarafında yaşıyorum; yürüyüş ve kahve molası.",
       "city": "Konya",
       "district": "Meram",
       "website": "",
@@ -91,7 +91,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_03",
     "email": "uye03.arsiv@konyago.demo",
-    "displayName": "KaratayNotları",
+    "displayName": "Mehmet Kaya",
     "passwordHash": "83185accfaf6de6c251f74cbe15c4da47da73cab9a48712f42549377d88b8330",
     "createdAt": "2026-08-03T11:00:00.000Z",
     "updatedAt": "2026-08-03T11:00:00.000Z",
@@ -105,7 +105,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Mevlana civarı ve medrese notları.",
+      "bio": "Tarih ve müze gezisi notları tutuyorum.",
       "city": "Konya",
       "district": "Karatay",
       "website": "",
@@ -121,7 +121,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_04",
     "email": "uye04.arsiv@konyago.demo",
-    "displayName": "SilleTaş",
+    "displayName": "Zeynep Arslan",
     "passwordHash": "7d007536f95607c2fccdac9c086d1d1a78ef9215a26db41160e93a668398c065",
     "createdAt": "2026-08-04T12:00:00.000Z",
     "updatedAt": "2026-08-04T12:00:00.000Z",
@@ -135,7 +135,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Sille kahvaltı ve taş sokaklar.",
+      "bio": "Sille ve taş sokaklar, kahvaltı önerileri.",
       "city": "Konya",
       "district": "Sille",
       "website": "",
@@ -151,7 +151,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_05",
     "email": "uye05.arsiv@konyago.demo",
-    "displayName": "EtliEkmekSever",
+    "displayName": "Mustafa Çelik",
     "passwordHash": "bd6d60237308b8c43ed209efe1aaf25566abfaf38974ccfa9c4dd4a4418e6318",
     "createdAt": "2026-08-04T13:00:00.000Z",
     "updatedAt": "2026-08-04T13:00:00.000Z",
@@ -165,7 +165,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Fırın ve lezzet avcısı.",
+      "bio": "Konya mutfağı ve fırın lezzetleri meraklısı.",
       "city": "Konya",
       "district": "Merkez",
       "website": "",
@@ -181,7 +181,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_06",
     "email": "uye06.arsiv@konyago.demo",
-    "displayName": "TramvaySaati",
+    "displayName": "Ayşe Öztürk",
     "passwordHash": "73665d355a5c0ddbd51361f44620a4a1d819ca1ef1d2612e974099cf31040b49",
     "createdAt": "2026-08-04T14:00:00.000Z",
     "updatedAt": "2026-08-04T14:00:00.000Z",
@@ -195,7 +195,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Ulaşım ve aktarma ipuçları.",
+      "bio": "Ulaşım, tramvay ve şehir içi pratik bilgiler.",
       "city": "Konya",
       "district": "Selçuklu",
       "website": "",
@@ -211,7 +211,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_07",
     "email": "uye07.arsiv@konyago.demo",
-    "displayName": "FotoKonya",
+    "displayName": "Emre Şahin",
     "passwordHash": "994dfa1662819d5498d9961dcd9ac4b637da254a168f728f0e2c758f59f09783",
     "createdAt": "2026-08-05T15:00:00.000Z",
     "updatedAt": "2026-08-05T15:00:00.000Z",
@@ -225,7 +225,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Şehir fotoğrafları, altın saat.",
+      "bio": "Fotoğraf çekmeyi severim; altın saat avcısıyım.",
       "city": "Konya",
       "district": "Karatay",
       "website": "",
@@ -241,7 +241,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_08",
     "email": "uye08.arsiv@konyago.demo",
-    "displayName": "TarihDefteri",
+    "displayName": "Fatma Aydın",
     "passwordHash": "d9c9f3eec3e8542dc983ba32ce085e2ee2bc5c897659b6e8705ef72667309330",
     "createdAt": "2026-08-05T16:00:00.000Z",
     "updatedAt": "2026-08-05T16:00:00.000Z",
@@ -255,7 +255,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Selçuklu izleri ve arşiv merakı.",
+      "bio": "Selçuklu mirası ve şehir arşivi ilgilisi.",
       "city": "Konya",
       "district": "Merkez",
       "website": "",
@@ -271,7 +271,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_09",
     "email": "uye09.arsiv@konyago.demo",
-    "displayName": "SemazenNot",
+    "displayName": "Burak Yıldız",
     "passwordHash": "69e8096dcf165861fb12e6ac22db326a3518afb942519e3f02f44e98311b306a",
     "createdAt": "2026-08-05T09:00:00.000Z",
     "updatedAt": "2026-08-05T09:00:00.000Z",
@@ -285,7 +285,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Müze ve ziyaret planı.",
+      "bio": "Mevlana çevresi ziyaret notları.",
       "city": "Konya",
       "district": "Karatay",
       "website": "",
@@ -301,7 +301,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_10",
     "email": "uye10.arsiv@konyago.demo",
-    "displayName": "KampüsKonya",
+    "displayName": "Merve Koç",
     "passwordHash": "dcf5760e8c9e2323ff1052dde066cea81df20d6cf772b283170de7112966bf06",
     "createdAt": "2026-08-06T10:00:00.000Z",
     "updatedAt": "2026-08-06T10:00:00.000Z",
@@ -315,7 +315,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Öğrenci hayatı, etkinlik.",
+      "bio": "Öğrenci; kampüs ve etkinlik takipçisi.",
       "city": "Konya",
       "district": "Selçuklu",
       "website": "",
@@ -331,7 +331,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_11",
     "email": "uye11.arsiv@konyago.demo",
-    "displayName": "İşKapısı42",
+    "displayName": "Hakan Acar",
     "passwordHash": "f054f990479b54ff02bc089ad56f805b62cece8c0d006f95e0d2341e61d0f923",
     "createdAt": "2026-08-06T11:00:00.000Z",
     "updatedAt": "2026-08-06T11:00:00.000Z",
@@ -345,7 +345,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "İş ve staj notları.",
+      "bio": "İş ve staj arayanlara deneyim paylaşırım.",
       "city": "Konya",
       "district": "Selçuklu",
       "website": "",
@@ -361,7 +361,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_12",
     "email": "uye12.arsiv@konyago.demo",
-    "displayName": "İkinciElKonya",
+    "displayName": "Selin Doğan",
     "passwordHash": "e0f61f3c9cbc24414bcb6f3a74f07e0c879aae85f06d7d8efd3898d7657620ec",
     "createdAt": "2026-08-06T12:00:00.000Z",
     "updatedAt": "2026-08-06T12:00:00.000Z",
@@ -375,7 +375,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Temiz ikinci el önerileri.",
+      "bio": "İkinci el ve güvenli buluşma notları.",
       "city": "Konya",
       "district": "Meram",
       "website": "",
@@ -391,7 +391,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_13",
     "email": "uye13.arsiv@konyago.demo",
-    "displayName": "AileRotası",
+    "displayName": "Can Özkan",
     "passwordHash": "53d7e6b3952af1f85f86ef2a423998b5459ac2087895af2ed7e0804bf7dd8dc0",
     "createdAt": "2026-08-07T13:00:00.000Z",
     "updatedAt": "2026-08-07T13:00:00.000Z",
@@ -405,7 +405,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Çocuklu gezi planları.",
+      "bio": "Ailece gezi ve çocuklu rota planları.",
       "city": "Konya",
       "district": "Karatay",
       "website": "",
@@ -421,7 +421,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_14",
     "email": "uye14.arsiv@konyago.demo",
-    "displayName": "GeceKonya",
+    "displayName": "Deniz Kurt",
     "passwordHash": "cf201e88ed2efdd3a60a87eb6c672d710933222ffe98df8425a580c04561b543",
     "createdAt": "2026-08-07T14:00:00.000Z",
     "updatedAt": "2026-08-07T14:00:00.000Z",
@@ -435,7 +435,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Akşam güzergâhları.",
+      "bio": "Akşam güzergâhları ve sakin mekanlar.",
       "city": "Konya",
       "district": "Meram",
       "website": "",
@@ -451,7 +451,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
   {
     "id": "mbr_seed_15",
     "email": "uye15.arsiv@konyago.demo",
-    "displayName": "YeniKomşu42",
+    "displayName": "İrem Polat",
     "passwordHash": "e2292f84d9b0a21125388df45579393ca908591a319c64f7b588f31b59ddcd9b",
     "createdAt": "2026-08-07T15:00:00.000Z",
     "updatedAt": "2026-08-07T15:00:00.000Z",
@@ -465,7 +465,7 @@ export const COMMUNITY_MEMBERS: Member[] = [
       "lastTickAt": "2026-08-09T12:00:00.000Z"
     },
     "profile": {
-      "bio": "Yeni taşınanlar için rehber.",
+      "bio": "Şehre yeni taşınanlar için pratik rehber.",
       "city": "Konya",
       "district": "Selçuklu",
       "website": "",
@@ -1315,9 +1315,21 @@ export const COMMUNITY_POSTS: Post[] = [
 export function mergeCommunityMembers(existing: Member[]): Member[] {
   const byId = new Map(existing.map((m) => [m.id, m]));
   for (const m of COMMUNITY_MEMBERS) {
-    if (!byId.has(m.id)) byId.set(m.id, m);
+    const prev = byId.get(m.id);
+    if (!prev) {
+      byId.set(m.id, m);
+      continue;
+    }
+    // Seed kayıtlarını güncel isim/profil ile tazele (v2 gerçekçi isimler)
+    if (m.id.startsWith("mbr_seed_")) {
+      byId.set(m.id, {
+        ...prev,
+        displayName: m.displayName,
+        profile: { ...prev.profile, ...m.profile },
+        passwordHash: m.passwordHash,
+      });
+    }
   }
-  // also avoid duplicate display names from seed if real user took name
   return [...byId.values()];
 }
 
@@ -1334,9 +1346,14 @@ export function mergeCommunityForum(input: {
   for (const p of COMMUNITY_POSTS) {
     if (!pMap.has(p.id)) pMap.set(p.id, p);
   }
+  const names = { ...input.names, ...COMMUNITY_NAMES };
+  // seed id'ler her zaman güncel isim
+  for (const [id, name] of Object.entries(COMMUNITY_NAMES)) {
+    names[id] = name;
+  }
   return {
     threads: [...tMap.values()],
     posts: [...pMap.values()],
-    names: { ...COMMUNITY_NAMES, ...input.names },
+    names,
   };
 }
