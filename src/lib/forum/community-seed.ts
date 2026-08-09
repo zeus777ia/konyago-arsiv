@@ -1331,6 +1331,12 @@ export function mergeCommunityMembers(existing: Member[]): Member[] {
         profile: { ...prev.profile, ...m.profile },
         passwordHash: m.passwordHash,
         activity: m.activity ?? prev.activity,
+        // seed e-postaları asla herkese açık olmaz
+        prefs: {
+          ...prev.prefs,
+          ...m.prefs,
+          showEmail: false,
+        },
       });
     }
   }

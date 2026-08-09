@@ -16,6 +16,7 @@ import { isFounderName } from "@/lib/staff/founder";
 import { useMembersHydrated } from "@/lib/auth/use-current-user";
 import { formatRelative } from "@/lib/utils";
 import { RankBadge, FrameBadge } from "@/components/forum/member-badges";
+import { publicMemberEmail } from "@/lib/members/privacy";
 import {
   formatActiveDuration,
   getFrame,
@@ -148,8 +149,10 @@ function PublicProfilePage() {
                   </span>
                 )}
               </div>
-              {prefs.showEmail && member?.email && (
-                <p className="mt-2 text-xs text-muted">{member.email}</p>
+              {publicMemberEmail(member) && (
+                <p className="mt-2 text-xs text-muted">
+                  {publicMemberEmail(member)}
+                </p>
               )}
               {profile.website && (
                 <a

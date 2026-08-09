@@ -12,6 +12,7 @@ import {
   type MemberActivity,
 } from "@/lib/members/ranks";
 import { mergeCommunityMembers } from "@/lib/forum/community-seed";
+import { isSeedDemoEmail, isSeedMemberId } from "@/lib/members/privacy";
 
 export type MemberPrefs = {
   /** E-posta panoda gösterilsin mi */
@@ -136,7 +137,13 @@ function normalizeMember(raw: Partial<Member> & {
       (raw as Partial<Member>).activity ?? DEFAULT_ACTIVITY,
     ),
     profile: { ...DEFAULT_PROFILE, ...(raw.profile ?? {}) },
-    prefs: { ...DEFAULT_PREFS, ...(raw.prefs ?? {}) },
+    prefs: {
+      ...DEFAULT_PREFS,
+      ...(raw.prefs ?? {}),
+      ...(isSeedMemberId(raw.id) || isSeedDemoEmail(raw.email)
+        ? { showEmail: false }
+        : {}),
+    },
   };
 }
 
@@ -149,15 +156,7 @@ export const useMembersStore = create<MembersState>()(
       ensureCommunityMembers: () => {
         const cur = get().members;
         const next = mergeCommunityMembers(cur).map((m) => normalizeMember(m));
-        if (next.length !== cur.length) {
-          set({ members: next });
-        } else {
-          // still merge missing seed ids
-          const ids = new Set(cur.map((m) => m.id));
-          const missing = next.filter((m) => !ids.has(m.id));
-          if (missing.length) set({ members: [...cur, ...missing] });
-          else set({ members: next });
-        }
+        set({ members: next });
       },
       logout: () => set({ session: null }),
       updateProfile: (input) => {
@@ -226,6 +225,9 @@ export const useMembersStore = create<MembersState>()(
               prefs: {
                 ...nm.prefs,
                 ...(input.prefs ?? {}),
+                ...(isSeedMemberId(nm.id) || isSeedDemoEmail(nm.email)
+                  ? { showEmail: false }
+                  : {}),
               },
             };
           }),
@@ -416,6 +418,12 @@ export async function changeEmail(input: {
     .getState()
     .members.find((m) => m.id === s.memberId);
   if (!member) return { ok: false, error: "Hesap bulunamadı" };
+  if (isSeedMemberId(member.id) || isSeedDemoEmail(member.email)) {
+    return {
+      ok: false,
+      error: "Sistem demo hesaplarında e-posta değiştirilemez / gösterilmez",
+    };
+  }
   const hash = await hashPassword(input.password, member.id);
   if (hash !== member.passwordHash) {
     return { ok: false, error: "Şifre hatalı" };
@@ -473,19 +481,25 @@ export async function deleteAccount(input: {
 export function exportMemberData(): string | null {
   const m = getSessionMember();
   if (!m) return null;
+  const hideMail = isSeedMemberId(m.id) || isSeedDemoEmail(m.email);
   const payload = {
     exportedAt: new Date().toISOString(),
     account: {
       id: m.id,
-      email: m.email,
+      email: hideMail ? "[gizli]" : m.email,
       displayName: m.displayName,
       createdAt: m.createdAt,
       updatedAt: m.updatedAt,
       lastLoginAt: m.lastLoginAt,
       profile: m.profile,
-      prefs: m.prefs,
+      prefs: {
+        ...m.prefs,
+        ...(hideMail ? { showEmail: false } : {}),
+      },
     },
-    note: "Şifre özeti güvenlik nedeniyle dışa aktarılmaz.",
+    note: hideMail
+      ? "Seed/sistem hesabı: e-posta dışa aktarılmaz. Şifre de aktarılmaz."
+      : "Şifre özeti güvenlik nedeniyle dışa aktarılmaz.",
   };
   return JSON.stringify(payload, null, 2);
 }

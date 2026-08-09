@@ -52,6 +52,7 @@ import {
 } from "@/lib/members/ranks";
 import { compressImageFile } from "@/lib/marketplace/data";
 import { isFounder } from "@/lib/staff/founder";
+import { isSeedDemoEmail, isSeedMemberId } from "@/lib/members/privacy";
 import { useForumStore } from "@/lib/forum/store";
 import { useMarketplaceStore } from "@/lib/marketplace/store";
 import { useJobsStore } from "@/lib/jobs/store";
@@ -134,7 +135,10 @@ function AccountPanelPage() {
 
   const founder = isFounder(user);
   const userName = user.displayName ?? "Üye";
-  const email = user.primaryEmail ?? "—";
+  const rawEmail = user.primaryEmail ?? "";
+  const isSeedAcct =
+    isSeedMemberId(member?.id) || isSeedDemoEmail(rawEmail);
+  const email = isSeedAcct ? "Gizli (sistem hesabı)" : rawEmail || "—";
   const isLocal = !!user.isLocalMember;
 
   const go = (id: Sekme) => ({
@@ -241,7 +245,9 @@ function AccountPanelPage() {
                 updateProfile={updateProfile}
               />
             )}
-            {tab === "guvenlik" && isLocal && <SecurityTab email={email} />}
+            {tab === "guvenlik" && isLocal && (
+              <SecurityTab email={email} seedLocked={isSeedAcct} />
+            )}
             {tab === "aktivite" && (
               <ActivityTab
                 userName={userName}
@@ -680,7 +686,7 @@ function ProfileTab({
   );
 }
 
-function SecurityTab({ email }: { email: string }) {
+function SecurityTab({ email, seedLocked }: { email: string; seedLocked?: boolean }) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newEmail, setNewEmail] = useState(email);
@@ -731,48 +737,60 @@ function SecurityTab({ email }: { email: string }) {
         </form>
       </PanelCard>
 
-      <PanelCard
-        title="E-posta değiştir"
-        description="Giriş e-postanız. Onay için mevcut şifre gerekir."
-      >
-        <form
-          className="space-y-3"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const res = await changeEmail({
-              password: emailPassword,
-              newEmail,
-            });
-            if (!res.ok) {
-              toast.error(res.error);
-              return;
-            }
-            toast.success("E-posta güncellendi");
-            setEmailPassword("");
-          }}
+      {seedLocked ? (
+        <PanelCard
+          title="E-posta"
+          description="Sistem demo hesaplarında e-posta adresi gizli tutulur."
         >
-          <Field label="Yeni e-posta">
-            <input
-              type="email"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="Şifre onayı">
-            <input
-              type="password"
-              value={emailPassword}
-              onChange={(e) => setEmailPassword(e.target.value)}
-              className={inputCls}
-            />
-          </Field>
-          <Button type="submit">
-            <Mail className="size-3.5" />
-            E-postayı güncelle
-          </Button>
-        </form>
-      </PanelCard>
+          <p className="text-sm text-muted">
+            Bu hesabın e-posta bilgisi profilde, dışa aktarımda ve listelerde
+            gösterilmez; değiştirilemez.
+          </p>
+        </PanelCard>
+      ) : (
+        <PanelCard
+          title="E-posta değiştir"
+          description="Giriş e-postanız. Onay için mevcut şifre gerekir."
+        >
+          <form
+            className="space-y-3"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const res = await changeEmail({
+                password: emailPassword,
+                newEmail,
+              });
+              if (!res.ok) {
+                toast.error(res.error);
+                return;
+              }
+              toast.success("E-posta güncellendi");
+              setEmailPassword("");
+            }}
+          >
+            <Field label="Yeni e-posta">
+              <input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Şifre onayı">
+              <input
+                type="password"
+                value={emailPassword}
+                onChange={(e) => setEmailPassword(e.target.value)}
+                className={inputCls}
+              />
+            </Field>
+            <Button type="submit">
+              <Mail className="size-3.5" />
+              E-postayı güncelle
+            </Button>
+          </form>
+        </PanelCard>
+      )}
     </div>
   );
 }
@@ -905,20 +923,31 @@ function PrefsTab({
   updateProfile: ReturnType<typeof useMembersStore.getState>["updateProfile"];
 }) {
   const prefs = { ...DEFAULT_PREFS, ...member.prefs };
+  const seedLocked =
+    isSeedMemberId(member.id) || isSeedDemoEmail(member.email);
+  const prefOptions = (
+    [
+      ...(seedLocked
+        ? []
+        : ([["showEmail", "E-postamı profilimde göster"]] as const)),
+      ["notifyModeration", "Moderasyon bilgilendirmeleri"],
+      ["notifyListings", "İlan özet tercihleri"],
+      ["preferCompactLists", "Kompakt liste görünümü"],
+    ] as const
+  );
   return (
     <PanelCard
       title="Tercihler"
       description="Gizlilik ve bilgilendirme tercihleri (yerel kayıt)."
     >
       <div className="space-y-3">
-        {(
-          [
-            ["showEmail", "E-postamı profilimde göster"],
-            ["notifyModeration", "Moderasyon bilgilendirmeleri"],
-            ["notifyListings", "İlan özet tercihleri"],
-            ["preferCompactLists", "Kompakt liste görünümü"],
-          ] as const
-        ).map(([key, label]) => (
+        {seedLocked && (
+          <p className="rounded-md border border-border bg-bg-elevated px-3 py-2 text-xs text-muted">
+            Bu hesapta e-posta adresi herkese kapalıdır ve profilde
+            gösterilemez.
+          </p>
+        )}
+        {prefOptions.map(([key, label]) => (
           <label
             key={key}
             className="flex cursor-pointer items-center gap-2 text-sm"
