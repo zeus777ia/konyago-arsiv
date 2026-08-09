@@ -11,6 +11,7 @@ import {
   normalizeActivity,
   type MemberActivity,
 } from "@/lib/members/ranks";
+import { mergeCommunityMembers } from "@/lib/forum/community-seed";
 
 export type MemberPrefs = {
   /** E-posta panoda gösterilsin mi */
@@ -77,6 +78,7 @@ type MembersState = {
   members: Member[];
   session: MemberSession | null;
   resetTokens: ResetToken[];
+  ensureCommunityMembers: () => void;
   logout: () => void;
   updateProfile: (input: {
     displayName?: string;
@@ -144,6 +146,19 @@ export const useMembersStore = create<MembersState>()(
       members: [],
       session: null,
       resetTokens: [],
+      ensureCommunityMembers: () => {
+        const cur = get().members;
+        const next = mergeCommunityMembers(cur).map((m) => normalizeMember(m));
+        if (next.length !== cur.length) {
+          set({ members: next });
+        } else {
+          // still merge missing seed ids
+          const ids = new Set(cur.map((m) => m.id));
+          const missing = next.filter((m) => !ids.has(m.id));
+          if (missing.length) set({ members: [...cur, ...missing] });
+          else set({ members: next });
+        }
+      },
       logout: () => set({ session: null }),
       updateProfile: (input) => {
         const s = get().session;
@@ -254,6 +269,9 @@ export const useMembersStore = create<MembersState>()(
           session: p.session ?? null,
           resetTokens: p.resetTokens ?? [],
         };
+      },
+      onRehydrateStorage: () => (state) => {
+        state?.ensureCommunityMembers();
       },
     },
   ),

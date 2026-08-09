@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Post, Thread, ThreadStatus } from "./data";
 import { ensureOfficialContent } from "./official-seed";
+import { mergeCommunityForum } from "./community-seed";
 import { canPostInCategory, moderateContent } from "./moderation";
 import { recordSpamEvent, runAllSpamChecks } from "./spam";
 import { normalizeTags } from "./tags";
@@ -84,17 +85,24 @@ export const useForumStore = create<ForumState>()(
       seededOfficial: false,
       ensureSeed: () => {
         const state = get();
-        const next = ensureOfficialContent(
+        const official = ensureOfficialContent(
           state.threads,
           state.posts,
           state.names,
         );
+        const next = mergeCommunityForum(official);
         set({
           threads: next.threads,
           posts: next.posts,
           names: next.names,
           seededOfficial: true,
         });
+        // seed members in parallel store
+        try {
+          useMembersStore.getState().ensureCommunityMembers?.();
+        } catch {
+          /* ignore */
+        }
       },
       addThread: ({
         categoryId,
