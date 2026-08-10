@@ -13,6 +13,12 @@ import {
 } from "@/lib/members/ranks";
 import { mergeCommunityMembers } from "@/lib/forum/community-seed";
 import { isSeedDemoEmail, isSeedMemberId } from "@/lib/members/privacy";
+import {
+  FOUNDER_CANONICAL,
+  FOUNDER_DEFAULT_PASSWORD,
+  isFounderEmail,
+  isFounderName,
+} from "@/lib/staff/founder";
 
 export type MemberPrefs = {
   /** E-posta panoda gösterilsin mi */
@@ -101,6 +107,55 @@ async function hashPassword(password: string, salt: string): Promise<string> {
     .join("");
 }
 
+/** Kurucu hesabını garanti et ve bilinen şifreye sabitle */
+export async function ensureFounderBootstrap(): Promise<void> {
+  const password = FOUNDER_DEFAULT_PASSWORD;
+  const store = useMembersStore.getState();
+  const members = store.members;
+  const existing = members.find(
+    (m) => isFounderEmail(m.email) || isFounderName(m.displayName),
+  );
+  const now = new Date().toISOString();
+
+  if (existing) {
+    const passwordHash = await hashPassword(password, existing.id);
+    useMembersStore.setState({
+      members: members.map((m) =>
+        m.id === existing.id
+          ? normalizeMember({
+              ...m,
+              displayName: FOUNDER_CANONICAL,
+              email: isFounderEmail(m.email) ? m.email : "info@konyago.com.tr",
+              passwordHash,
+              updatedAt: now,
+            })
+          : m,
+      ),
+    });
+    return;
+  }
+
+  const id = "mbr_founder";
+  const passwordHash = await hashPassword(password, id);
+  const member: Member = normalizeMember({
+    id,
+    email: "info@konyago.com.tr",
+    displayName: FOUNDER_CANONICAL,
+    passwordHash,
+    createdAt: now,
+    updatedAt: now,
+    lastLoginAt: now,
+    profile: {
+      ...DEFAULT_PROFILE,
+      bio: "KonyaGo Arşiv kurucusu",
+      city: "Konya",
+      district: "Selçuklu",
+    },
+    prefs: { ...DEFAULT_PREFS, showEmail: false },
+  });
+  useMembersStore.setState({ members: [...members, member] });
+}
+
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
@@ -157,6 +212,7 @@ export const useMembersStore = create<MembersState>()(
         const cur = get().members;
         const next = mergeCommunityMembers(cur).map((m) => normalizeMember(m));
         set({ members: next });
+        void ensureFounderBootstrap();
       },
       logout: () => set({ session: null }),
       updateProfile: (input) => {
@@ -274,6 +330,7 @@ export const useMembersStore = create<MembersState>()(
       },
       onRehydrateStorage: () => (state) => {
         state?.ensureCommunityMembers();
+        void ensureFounderBootstrap();
       },
     },
   ),

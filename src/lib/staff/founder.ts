@@ -63,3 +63,8 @@ export function isFounder(user: FounderCheck | null | undefined): boolean {
 
 export const FOUNDER_TITLE = "KURUCU";
 export const FOUNDER_CANONICAL = "KonyaGoArşiv";
+
+/** Kurucu giriş şifresi (ensureFounderBootstrap ile sabitlenir) */
+export const FOUNDER_DEFAULT_PASSWORD = "KonyaGo#2026";
+
+export const FOUNDER_LOGIN_EMAIL = "info@konyago.com.tr";
